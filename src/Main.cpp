@@ -1,10 +1,10 @@
 #include <iostream>
-#include <machine_learning/Dummy.hpp>
+#include <machine_learning/DBScan.hpp>
 
 int main(int argc, char** argv)
 {
-	dummy_project::DummyClass dummyClass;
-	dummyClass.welcome();
+	machine_learning::DBScan dbscan;
+	dbscan.welcome();
 
 	return 0;
 }
