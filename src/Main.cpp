@@ -20,9 +20,6 @@ int main(int argc, char** argv)
     p[2] = 8;
     pc.points.push_back(p);
 
-    // DBScanResult res = dbscan.scan(&pc, 4, 2.0);
-	dbscan.welcome();
-
     std::map<base::Point*, int>::iterator it;
     std::map<base::Point*, int> clustering = dbscan.scan(&pc, 4, 2.0);
 
