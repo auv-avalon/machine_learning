@@ -32,19 +32,27 @@ namespace machine_learning
 	{
 		public:
             static const int UNCLASSIFIED = -1;
+            static const int NOISE = -2;
 
             DBScan();
-            std::map<base::Point*, int> scan(base::samples::Pointcloud* pointcloud, int min_pts, double epsilon);
+            std::map<base::Point*, int> scan(base::samples::Pointcloud* pointcloud, unsigned int min_pts, double epsilon, bool use_z = false);
             void reset();
+            double euclidean_distance(base::Point* p1, base::Point* p2, bool use_z = false);
 
         private:
-            std::map<base::Point*, int>::iterator it;
+            int cluster_id;
+            unsigned int min_pts;
+            double epsilon;
+            bool use_z;
+            base::samples::Pointcloud* pointcloud;
+
             std::map<base::Point*, int> clustering;
             int number_of_points;
 
-            void initialize(base::samples::Pointcloud* pointcloud);
+            void initialize(base::samples::Pointcloud* pointcloud, unsigned int min_pts, double epsilon, bool use_z);
             bool expandCluster(base::Point* start_point, int cluster_id);
             void classify(base::Point* point, int cluster_id);
+            std::vector<base::Point*> neighbors(base::Point* point);
 
 	};
 
