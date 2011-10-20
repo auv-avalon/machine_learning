@@ -3,5 +3,6 @@ rock_library(machine_learning
     HEADERS DBScan.hpp)
 
 rock_executable(machine_learning_bin Main.cpp
-    DEPS machine_learning)
+    DEPS machine_learning
+    DEPS_PKGCONFIG base-types)
 
