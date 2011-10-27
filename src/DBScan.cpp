@@ -3,16 +3,20 @@
 
 namespace machine_learning
 {
-    DBScan::DBScan()
+    DBScan::DBScan(base::samples::Pointcloud* pointcloud, unsigned int min_pts, double epsilon, bool use_z)
     {
+        this->pointcloud = pointcloud;
+        this->min_pts = min_pts;
+        this->epsilon = epsilon;
+        this->use_z = use_z;
         number_of_points = 0;
+        initialize();
     }
 
-    std::map<base::Point*, int> DBScan::scan(base::samples::Pointcloud* pointcloud, unsigned int min_pts, double epsilon, bool use_z)
+    std::map<base::Point*, int> DBScan::scan()
     {
-
         // Initialize clustering
-        initialize(pointcloud, min_pts, epsilon, use_z);
+        initialize();
 
         // Scan for clusters
         for(int i = 0; i < number_of_points; i++) {
@@ -35,15 +39,12 @@ namespace machine_learning
     }
 
     // All points in point cloud are being initialized as unclassified.
-    void DBScan::initialize(base::samples::Pointcloud* pointcloud, unsigned int min_pts, double epsilon, bool use_z)
+    void DBScan::initialize()
     {
         if(!clustering.empty()) {
             reset();
         }
 
-        this->min_pts = min_pts;
-        this->epsilon = epsilon;
-        this->use_z = use_z;
         cluster_id = 0;
         number_of_points = pointcloud->points.size();
 
@@ -114,7 +115,6 @@ namespace machine_learning
     double DBScan::euclidean_distance(base::Point* p1, base::Point* p2, bool use_z)
     {
         int dimensions = (use_z ? 3 : 2);
-        std::cout << "number of dimensions: " << dimensions << std::endl;
 
         double sum = 0;
         for(int dim = 0; dim < dimensions; dim++) {
