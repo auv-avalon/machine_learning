@@ -1,32 +1,24 @@
 #ifndef _MACHINE_LEARNING_DBSCAN_HPP_
 #define _MACHINE_LEARNING_DBSCAN_HPP_
 
+#include <sonar_detectors/SonarDetectorTypes.hpp>
 #include <base/samples/pointcloud.h>
 #include <iostream>
 #include <vector>
 #include <map>
+#include <list>
 
 
 namespace machine_learning
 {
 
     // Helpers
-    static std::string pointToString(base::Point* p)
+    static std::string pointToString(sonar_detectors::obstaclePoint* p)
     {
         std::stringstream ss;
-        ss << "(" << (*p)[0] << "," << (*p)[1] << "," << (*p)[2] << ")";
+        ss << "(" << (*p).position[0] << "," << (*p).position[1] << "," << (*p).position[2] << ")";
         return ss.str();
     }
-
-    struct DBScanResult {
-        base::samples::Pointcloud pointcloud;
-        int cluster_id;
-    };
-
-    struct ClusteredPoint {
-        base::Point* point;
-        int cluster_id;
-    };
 
 	class DBScan
 	{
@@ -34,25 +26,25 @@ namespace machine_learning
             static const int UNCLASSIFIED = -1;
             static const int NOISE = -2;
 
-            DBScan(base::samples::Pointcloud* pointcloud, unsigned int min_pts, double epsilon, bool use_z = false);
-            std::map<base::Point*, int> scan();
+            DBScan(std::list<sonar_detectors::obstaclePoint>* featureList, unsigned int min_pts, double epsilon, bool use_z = false);
+            std::map<sonar_detectors::obstaclePoint*, int> scan();
             void reset();
-            double euclidean_distance(base::Point* p1, base::Point* p2, bool use_z = false);
+            double euclidean_distance(sonar_detectors::obstaclePoint* p1, sonar_detectors::obstaclePoint* p2, bool use_z = false);
 
         private:
             int cluster_id;
             unsigned int min_pts;
             double epsilon;
             bool use_z;
-            base::samples::Pointcloud* pointcloud;
+            std::list<sonar_detectors::obstaclePoint>* featureList;
 
-            std::map<base::Point*, int> clustering;
+            std::map<sonar_detectors::obstaclePoint*, int> clustering;
             int number_of_points;
 
             void initialize();
-            bool expandCluster(base::Point* start_point, int cluster_id);
-            void classify(base::Point* point, int cluster_id);
-            std::vector<base::Point*> neighbors(base::Point* point);
+            bool expandCluster(sonar_detectors::obstaclePoint* start_point, int cluster_id);
+            void classify(sonar_detectors::obstaclePoint* point, int cluster_id);
+            std::vector<sonar_detectors::obstaclePoint*> neighbors(sonar_detectors::obstaclePoint* point);
 
 	};
 
