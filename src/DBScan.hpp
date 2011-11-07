@@ -7,16 +7,17 @@
 #include <vector>
 #include <map>
 #include <list>
+#include <boost/foreach.hpp>
 
 
 namespace machine_learning
 {
 
     // Helpers
-    static std::string pointToString(sonar_detectors::obstaclePoint* p)
+    static std::string pointToString(sonar_detectors::obstaclePoint& p)
     {
         std::stringstream ss;
-        ss << "(" << (*p).position[0] << "," << (*p).position[1] << "," << (*p).position[2] << ")";
+        ss << "(" << p.position[0] << "," << p.position[1] << "," << p.position[2] << ")";
         return ss.str();
     }
 
@@ -29,7 +30,7 @@ namespace machine_learning
             DBScan(std::list<sonar_detectors::obstaclePoint>* featureList, unsigned int min_pts, double epsilon, bool use_z = false);
             std::map<sonar_detectors::obstaclePoint*, int> scan();
             void reset();
-            double euclidean_distance(sonar_detectors::obstaclePoint* p1, sonar_detectors::obstaclePoint* p2, bool use_z = false);
+            double euclidean_distance(sonar_detectors::obstaclePoint& p1, sonar_detectors::obstaclePoint& p2, bool use_z = false);
 
         private:
             int cluster_id;
@@ -42,9 +43,9 @@ namespace machine_learning
             int number_of_points;
 
             void initialize();
-            bool expandCluster(sonar_detectors::obstaclePoint* start_point, int cluster_id);
-            void classify(sonar_detectors::obstaclePoint* point, int cluster_id);
-            std::vector<sonar_detectors::obstaclePoint*> neighbors(sonar_detectors::obstaclePoint* point);
+            bool expandCluster(sonar_detectors::obstaclePoint& start_point, int cluster_id);
+            void classify(sonar_detectors::obstaclePoint& point, int cluster_id);
+            std::vector<sonar_detectors::obstaclePoint*> neighbors(sonar_detectors::obstaclePoint& point);
 
 	};
 

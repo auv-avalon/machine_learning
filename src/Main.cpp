@@ -11,7 +11,7 @@ std::list<sonar_detectors::obstaclePoint>* pointCloud;
 std::list<sonar_detectors::obstaclePoint>* generateRandomPointCloud(int size) {
     delete pointCloud;
     pointCloud = new std::list<sonar_detectors::obstaclePoint>();
-    int coordRange = 4;
+    int coordRange = 40;
     for(int i = 0; i < size; i++) {
         sonar_detectors::obstaclePoint p;
 	p.position[0] = rand() % coordRange;
@@ -26,15 +26,16 @@ int main(int argc, char** argv)
 {
     std::cout << "Welcome to the testing of machine_learning" << std::endl;
     
-    int seed = 1320319343;// time(NULL);
+    //int seed = 1320319343;
+    int seed = time(NULL);
     std::cout << seed << std::endl;
     srand(seed);
 
-    std::list<sonar_detectors::obstaclePoint>* pl = generateRandomPointCloud(10);
-	machine_learning::DBScan dbscan(pl, 2, 2.0); // ignoring depth! use_z = 0
+    std::list<sonar_detectors::obstaclePoint>* pl = generateRandomPointCloud(50);
+    machine_learning::DBScan dbscan(pl, 3, 4.0); // ignoring depth! use_z = 0
 
     /*
-    double dist = dbscan.euclidean_distance(&p1, &p2, false);
+    double dist = dbscan.euclidean_distance(p1, p2, false);
     std::cout << "Distance between p1 and p2: " << dist << std::endl;
     */
 
@@ -43,7 +44,7 @@ int main(int argc, char** argv)
 
     std::cout << "Clustering:" << std::endl;
     for(it = clustering.begin(); it != clustering.end(); it++) {
-        std::cout << machine_learning::pointToString(it->first) << " clustered as " << it->second << std::endl;
+        std::cout << machine_learning::pointToString(*(*it).first) << " clustered as " << (*it).second << std::endl;
     }
 
 	return 0;
