@@ -24,6 +24,7 @@ namespace machine_learning
 	class DBScan
 	{
 		public:
+            static const int FIRST_CLUSTER_ID = 0;
             static const int UNCLASSIFIED = -1;
             static const int NOISE = -2;
 
@@ -32,8 +33,13 @@ namespace machine_learning
             void reset();
             double euclidean_distance(sonar_detectors::obstaclePoint& p1, sonar_detectors::obstaclePoint& p2, bool use_z = false);
 
+            // Returns the amount of clusters found in the current point cloud.
+            // WARNING: Call this method AFTER running scan()!
+            int getClusterCount();
+
         private:
             int cluster_id;
+            int cluster_count;
             unsigned int min_pts;
             double epsilon;
             bool use_z;

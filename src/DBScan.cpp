@@ -9,7 +9,10 @@ namespace machine_learning
         this->min_pts = min_pts;
         this->epsilon = epsilon;
         this->use_z = use_z;
+        cluster_count = 0;
         number_of_points = 0;
+        std::cout << "DBScan parameters:\n" << "Epsilon: " << this->epsilon
+            << "\nMin_Pts: " << this->min_pts << std::endl;
         //initialize(); TODO Do we need this? Interferes with initialize() call in scan()
     }
 
@@ -25,6 +28,7 @@ namespace machine_learning
                 if (expandCluster(*it, cluster_id)) {
                     // New cluster found.
                     cluster_id++;
+                    cluster_count++;
                 }
             }
         }
@@ -35,6 +39,8 @@ namespace machine_learning
     {
         clustering.clear();
         number_of_points = 0;
+        cluster_count = 0;
+        cluster_id = FIRST_CLUSTER_ID;
     }
 
     // All points in point cloud are being initialized as unclassified.
@@ -44,7 +50,7 @@ namespace machine_learning
             reset();
         }
 
-        cluster_id = 0;
+        cluster_id = FIRST_CLUSTER_ID;
         number_of_points = featureList->size();
 
         for(std::list<sonar_detectors::obstaclePoint>::iterator it = featureList->begin(); it != featureList->end();  it++) {
@@ -71,9 +77,9 @@ namespace machine_learning
 
         while(!seeds.empty()) {
             const int PICK_POS = 0; // TODO maybe improve choice using heuristic
-            sonar_detectors::obstaclePoint* seed = seeds[PICK_POS]; 
+            sonar_detectors::obstaclePoint* seed = seeds[PICK_POS];
             std::vector<sonar_detectors::obstaclePoint*> currentSeeds = neighbors(*seed);
-            
+
             if(currentSeeds.size() >= min_pts) {
                 // Current Point has enough neighbors in epsilon radius.
                 BOOST_FOREACH( sonar_detectors::obstaclePoint* currentSeed, currentSeeds ) {
@@ -88,13 +94,13 @@ namespace machine_learning
                     }
                 }
             }
-            
+
             if(seeds.begin() != seeds.end()) {
                 seeds.erase(seeds.begin()+PICK_POS);
             }
 
         }
-        
+
         cluster_id++;
         return true;
     }
@@ -125,6 +131,11 @@ namespace machine_learning
             sum += pow((p1.position[dim] - p2.position[dim]), 2);
         }
         return sqrt(sum);
+    }
+
+    int DBScan::getClusterCount()
+    {
+        return cluster_count;
     }
 
 }
