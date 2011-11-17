@@ -21,6 +21,9 @@ namespace machine_learning
         return ss.str();
     }
 
+    /* This class implements the DBScan density based clustering algorithm for the specific use case of clustering obstacle points generated from sonar scan samples. For further information consult the following book:
+     * Ester, M.; Sander, J.: Knowledge Discovery in Databases - Techniken und Anwendungen. 2000. Springer. Berlin.
+     */
 	class DBScan
 	{
 		public:
@@ -36,6 +39,10 @@ namespace machine_learning
             // Returns the amount of clusters found in the current point cloud.
             // WARNING: Call this method AFTER running scan()!
             int getClusterCount();
+            
+            // Returns the amount of points in the current point cloud classified as NOISE.
+            // WARNING: Call this method AFTER running scan()!
+            int getNoiseCount();
 
         private:
             int cluster_id;

@@ -108,7 +108,7 @@ namespace machine_learning
     void DBScan::classify(sonar_detectors::obstaclePoint& point, int cluster_id)
     {
         bool ret = clustering.insert(std::pair<sonar_detectors::obstaclePoint*, int>(&point, cluster_id)).second;
-        std::cout << (ret ? "Inserted point " : "Point already inserted: ") << machine_learning::pointToString(point) << std::endl;
+        //std::cout << (ret ? "Inserted point " : "Point already inserted: ") << machine_learning::pointToString(point) << std::endl;
     }
 
     std::vector<sonar_detectors::obstaclePoint*> DBScan::neighbors(sonar_detectors::obstaclePoint& point) {
@@ -136,6 +136,17 @@ namespace machine_learning
     int DBScan::getClusterCount()
     {
         return cluster_count;
+    }
+    
+    int DBScan::getNoiseCount()
+    {
+        int nc = 0;
+        for(std::map<sonar_detectors::obstaclePoint*, int>::iterator it = clustering.begin(); it != clustering.end(); it++) {
+            if(it->second == NOISE) {
+                nc++;
+            }
+        }
+        return nc;
     }
 
 }
