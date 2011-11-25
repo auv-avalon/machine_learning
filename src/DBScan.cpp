@@ -3,7 +3,7 @@
 
 namespace machine_learning
 {
-    DBScan::DBScan(std::list<sonar_detectors::obstaclePoint>* featureList, unsigned int min_pts, double epsilon, bool use_z)
+    DBScan::DBScan(std::list<base::Vector3d>* featureList, unsigned int min_pts, double epsilon, bool use_z)
     {
         this->featureList = featureList;
         this->min_pts = min_pts;
@@ -16,13 +16,13 @@ namespace machine_learning
         //initialize(); TODO Do we need this? Interferes with initialize() call in scan()
     }
 
-    std::map<sonar_detectors::obstaclePoint*, int> DBScan::scan()
+    std::map<base::Vector3d*, int> DBScan::scan()
     {
         // Initialize clustering
         initialize();
 
         // Scan for clusters
-        for(std::list<sonar_detectors::obstaclePoint>::iterator it = featureList->begin(); it != featureList->end(); it++) {
+        for(std::list<base::Vector3d>::iterator it = featureList->begin(); it != featureList->end(); it++) {
             if (clustering[&(*it)] == UNCLASSIFIED) {
                 // Try to classify point
                 if (expandCluster(*it, cluster_id)) {
@@ -53,15 +53,15 @@ namespace machine_learning
         cluster_id = FIRST_CLUSTER_ID;
         number_of_points = featureList->size();
 
-        for(std::list<sonar_detectors::obstaclePoint>::iterator it = featureList->begin(); it != featureList->end();  it++) {
+        for(std::list<base::Vector3d>::iterator it = featureList->begin(); it != featureList->end();  it++) {
             classify(*it, UNCLASSIFIED);
         }
     }
 
-    bool DBScan::expandCluster(sonar_detectors::obstaclePoint& start_point, int cluster_id)
+    bool DBScan::expandCluster(base::Vector3d &start_point, int cluster_id)
     {
         // Neighbor points in epsilon radius
-        std::vector<sonar_detectors::obstaclePoint*> seeds = neighbors(start_point);
+        std::vector<base::Vector3d*> seeds = neighbors(start_point);
         if (seeds.size() < min_pts) {
             // start_point has not enough neighbors in epsilon radius (is no "Kernobjekt").
             // Therefore it does not belong to any cluster.
@@ -71,18 +71,18 @@ namespace machine_learning
 
         // New cluster found. The start point and all its neighbors belong to it. Assign cluster ID.
         clustering[&start_point] = cluster_id;
-        for(std::vector<sonar_detectors::obstaclePoint*>::iterator it = seeds.begin(); it != seeds.end(); it++) {
+        for(std::vector<base::Vector3d*>::iterator it = seeds.begin(); it != seeds.end(); it++) {
             clustering[*it] = cluster_id;
         }
 
         while(!seeds.empty()) {
             const int PICK_POS = 0; // TODO maybe improve choice using heuristic
-            sonar_detectors::obstaclePoint* seed = seeds[PICK_POS];
-            std::vector<sonar_detectors::obstaclePoint*> currentSeeds = neighbors(*seed);
+            base::Vector3d* seed = seeds[PICK_POS];
+            std::vector<base::Vector3d*> currentSeeds = neighbors(*seed);
 
             if(currentSeeds.size() >= min_pts) {
                 // Current Point has enough neighbors in epsilon radius.
-                BOOST_FOREACH( sonar_detectors::obstaclePoint* currentSeed, currentSeeds ) {
+                BOOST_FOREACH( base::Vector3d* currentSeed, currentSeeds ) {
                     if(clustering[currentSeed] == UNCLASSIFIED || clustering[currentSeed] == NOISE) {
                         // Point has no cluster ID so far.
                         if(clustering[currentSeed] == UNCLASSIFIED) {
@@ -105,15 +105,15 @@ namespace machine_learning
         return true;
     }
 
-    void DBScan::classify(sonar_detectors::obstaclePoint& point, int cluster_id)
+    void DBScan::classify(base::Vector3d &point, int cluster_id)
     {
-        bool ret = clustering.insert(std::pair<sonar_detectors::obstaclePoint*, int>(&point, cluster_id)).second;
+        bool ret = clustering.insert(std::pair<base::Vector3d*, int>(&point, cluster_id)).second;
         //std::cout << (ret ? "Inserted point " : "Point already inserted: ") << machine_learning::pointToString(point) << std::endl;
     }
 
-    std::vector<sonar_detectors::obstaclePoint*> DBScan::neighbors(sonar_detectors::obstaclePoint& point) {
-        std::list<sonar_detectors::obstaclePoint>::iterator it;
-        std::vector<sonar_detectors::obstaclePoint*> neighbors;
+    std::vector<base::Vector3d*> DBScan::neighbors(base::Vector3d &point) {
+        std::list<base::Vector3d>::iterator it;
+        std::vector<base::Vector3d*> neighbors;
         for(it = featureList->begin(); it != featureList->end(); it++) {
             if(euclidean_distance(point, *it) <= epsilon) {
                 neighbors.push_back(&(*it));
@@ -122,13 +122,13 @@ namespace machine_learning
         return neighbors;
     }
 
-    double DBScan::euclidean_distance(sonar_detectors::obstaclePoint& p1, sonar_detectors::obstaclePoint& p2, bool use_z)
+    double DBScan::euclidean_distance(base::Vector3d &p1, base::Vector3d &p2, bool use_z)
     {
         int dimensions = (use_z ? 3 : 2);
 
         double sum = 0;
         for(int dim = 0; dim < dimensions; dim++) {
-            sum += pow((p1.position[dim] - p2.position[dim]), 2);
+            sum += pow((p1[dim] - p2[dim]), 2);
         }
         return sqrt(sum);
     }
@@ -137,11 +137,11 @@ namespace machine_learning
     {
         return cluster_count;
     }
-    
+
     int DBScan::getNoiseCount()
     {
         int nc = 0;
-        for(std::map<sonar_detectors::obstaclePoint*, int>::iterator it = clustering.begin(); it != clustering.end(); it++) {
+        for(std::map<base::Vector3d*, int>::iterator it = clustering.begin(); it != clustering.end(); it++) {
             if(it->second == NOISE) {
                 nc++;
             }

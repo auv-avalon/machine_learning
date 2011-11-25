@@ -4,5 +4,5 @@ rock_library(machine_learning
 
 rock_executable(machine_learning_bin Main.cpp
     DEPS machine_learning
-    DEPS_PKGCONFIG base-types)
+    DEPS_PKGCONFIG base-types eigen3)
 

@@ -1,7 +1,6 @@
 #ifndef _MACHINE_LEARNING_DBSCAN_HPP_
 #define _MACHINE_LEARNING_DBSCAN_HPP_
 
-#include <sonar_detectors/SonarDetectorTypes.hpp>
 #include <base/samples/pointcloud.h>
 #include <iostream>
 #include <vector>
@@ -14,10 +13,10 @@ namespace machine_learning
 {
 
     // Helpers
-    static std::string pointToString(sonar_detectors::obstaclePoint& p)
+    static std::string pointToString(base::Vector3d &p)
     {
         std::stringstream ss;
-        ss << "(" << p.position[0] << "," << p.position[1] << "," << p.position[2] << ")";
+        ss << "(" << p[0] << "," << p[1] << "," << p[2] << ")";
         return ss.str();
     }
 
@@ -31,15 +30,15 @@ namespace machine_learning
             static const int UNCLASSIFIED = -1;
             static const int NOISE = -2;
 
-            DBScan(std::list<sonar_detectors::obstaclePoint>* featureList, unsigned int min_pts, double epsilon, bool use_z = false);
-            std::map<sonar_detectors::obstaclePoint*, int> scan();
+            DBScan(std::list<base::Vector3d>* featureList, unsigned int min_pts, double epsilon, bool use_z = false);
+            std::map<base::Vector3d*, int> scan();
             void reset();
-            double euclidean_distance(sonar_detectors::obstaclePoint& p1, sonar_detectors::obstaclePoint& p2, bool use_z = false);
+            static double euclidean_distance(base::Vector3d &p1, base::Vector3d &p2, bool use_z = false);
 
             // Returns the amount of clusters found in the current point cloud.
             // WARNING: Call this method AFTER running scan()!
             int getClusterCount();
-            
+
             // Returns the amount of points in the current point cloud classified as NOISE.
             // WARNING: Call this method AFTER running scan()!
             int getNoiseCount();
@@ -50,15 +49,15 @@ namespace machine_learning
             unsigned int min_pts;
             double epsilon;
             bool use_z;
-            std::list<sonar_detectors::obstaclePoint>* featureList;
+            std::list<base::Vector3d>* featureList;
 
-            std::map<sonar_detectors::obstaclePoint*, int> clustering;
+            std::map<base::Vector3d*, int> clustering;
             int number_of_points;
 
             void initialize();
-            bool expandCluster(sonar_detectors::obstaclePoint& start_point, int cluster_id);
-            void classify(sonar_detectors::obstaclePoint& point, int cluster_id);
-            std::vector<sonar_detectors::obstaclePoint*> neighbors(sonar_detectors::obstaclePoint& point);
+            bool expandCluster(base::Vector3d &start_point, int cluster_id);
+            void classify(base::Vector3d &point, int cluster_id);
+            std::vector<base::Vector3d*> neighbors(base::Vector3d &point);
 
 	};
 
