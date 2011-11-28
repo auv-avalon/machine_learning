@@ -4,7 +4,6 @@
 #include <sstream>
 #include <cstdlib> // rand()
 #include <machine_learning/DBScan.hpp>
-#include <sonar_detectors/SonarDetectorTypes.hpp>
 
 std::list<base::Vector3d>* pointCloud;
 
