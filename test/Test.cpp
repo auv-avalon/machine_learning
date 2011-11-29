@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(clustering_test) {
     featureList.push_back(p_n_2);
 
     DBScan dbs(&featureList, 3, 3.0, false);
-    std::map<base::Vector3d, int> clustering = dbs.scan();
+    std::map<base::Vector3d*, int> clustering = dbs.scan();
 
     BOOST_CHECK_EQUAL(dbs.getClusterCount(), 1);
     BOOST_CHECK_EQUAL(dbs.getNoiseCount(), 3);
