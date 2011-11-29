@@ -44,6 +44,33 @@ BOOST_AUTO_TEST_CASE(euclidean_distance_test) {
     BOOST_CHECK_EQUAL(DBScan::euclidean_distance(p10, p11, true), 3.0);
 }
 
+BOOST_AUTO_TEST_CASE(clustering_test) {
+
+    /* Point naming scheme: p_<cluster_id>_<point_number> */
+
+    /* Cluster 0 */
+    base::Vector3d p_0_0(1.5, 8,   0);
+    base::Vector3d p_0_1(2,   6,   0);
+    base::Vector3d p_0_2(1.0, 7.5, 0);
+
+    /* Noise */
+    base::Vector3d p_n_0(1.5, 2, 0); // far away from c_0
+    base::Vector3d p_n_1(-5,  9, 0); // very far away from c_0
+    base::Vector3d p_n_2(5.5, 6, 0); // almost in range of p_0_1
+
+    std::list<base::Vector3d> featureList;
+    featureList.push_back(p_0_0);
+    featureList.push_back(p_0_1);
+    featureList.push_back(p_0_2);
+    featureList.push_back(p_n_0);
+    featureList.push_back(p_n_1);
+    featureList.push_back(p_n_2);
+
+    DBScan dbs(&featureList, 3, 3.0, false);
+    std::map<base::Vector3d, int> clustering = dbs.scan();
+
+    BOOST_CHECK_EQUAL(dbs.getClusterCount(), 1);
+    BOOST_CHECK_EQUAL(dbs.getNoiseCount(), 3);
 
 }
 
