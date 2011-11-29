@@ -1,7 +1,7 @@
 #ifndef _MACHINE_LEARNING_DBSCAN_HPP_
 #define _MACHINE_LEARNING_DBSCAN_HPP_
 
-#include <base/samples/pointcloud.h>
+#include <base/eigen.h>
 #include <iostream>
 #include <vector>
 #include <map>
