@@ -30,10 +30,10 @@ namespace machine_learning
             static const int UNCLASSIFIED = -1;
             static const int NOISE = -2;
 
-            DBScan(std::list<base::Vector3d>* featureList, unsigned int min_pts, double epsilon, bool use_z = false);
+            DBScan(std::list<base::Vector3d*>* featureList, unsigned int min_pts, double epsilon, bool use_z = false);
             std::map<base::Vector3d*, int> scan();
             void reset();
-            static double euclidean_distance(base::Vector3d &p1, base::Vector3d &p2, bool use_z = false);
+            static double euclidean_distance(base::Vector3d *p1, base::Vector3d *p2, bool use_z = false);
 
             // Returns the amount of clusters found in the current point cloud.
             // WARNING: Call this method AFTER running scan()!
@@ -49,16 +49,15 @@ namespace machine_learning
             unsigned int min_pts;
             double epsilon;
             bool use_z;
-            std::list<base::Vector3d>* featureList;
+            std::list<base::Vector3d*>* featureList;
 
             std::map<base::Vector3d*, int> clustering;
             int number_of_points;
 
             void initialize();
-            bool expandCluster(base::Vector3d &start_point, int cluster_id);
-            void classify(base::Vector3d &point, int cluster_id);
-            std::vector<base::Vector3d*> neighbors(base::Vector3d &point);
-
+            bool expandCluster(base::Vector3d *start_point, int cluster_id);
+            void classify(base::Vector3d *point, int cluster_id);
+            std::vector<base::Vector3d*> neighbors(base::Vector3d *point);
 	};
 
 } // end namespace machine_learning

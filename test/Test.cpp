@@ -1,9 +1,12 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE DBScan_test
 
+#include <iostream>
+#include <stdio.h>
+#include "../src/DBScan.hpp"
+
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
-#include "../src/DBScan.hpp"
 
 using namespace machine_learning;
 
@@ -13,38 +16,38 @@ BOOST_AUTO_TEST_CASE(euclidean_distance_test) {
     base::Vector3d p3(-2,4,5);
 
     // Equal points => distance = 0
-    BOOST_CHECK_EQUAL(DBScan::euclidean_distance(p1, p2, true), 0.0);
+    BOOST_CHECK_EQUAL(DBScan::euclidean_distance(&p1, &p2, true), 0.0);
 
     // Commutative points
-    BOOST_CHECK_EQUAL(DBScan::euclidean_distance(p2, p3, true), DBScan::euclidean_distance(p3, p2, true));
+    BOOST_CHECK_EQUAL(DBScan::euclidean_distance(&p2, &p3, true), DBScan::euclidean_distance(&p3, &p2, true));
 
     // Zero
     base::Vector3d p_zero_1(0,0,0);
     base::Vector3d p_zero_2(0,0,0);
-    BOOST_CHECK_EQUAL(DBScan::euclidean_distance(p_zero_1, p_zero_2, true), 0.0);
+    BOOST_CHECK_EQUAL(DBScan::euclidean_distance(&p_zero_1, &p_zero_2, true), 0.0);
 
     // Ignore Z Dimension
     base::Vector3d p4(3,4,5);
     base::Vector3d p4_no_z(3,4,0);
     base::Vector3d p5(-2,8,-3);
     base::Vector3d p5_no_z(-2,8,0);
-    BOOST_CHECK_EQUAL(DBScan::euclidean_distance(p4, p5, false), DBScan::euclidean_distance(p4_no_z, p5_no_z, false));
+    BOOST_CHECK_EQUAL(DBScan::euclidean_distance(&p4, &p5, false), DBScan::euclidean_distance(&p4_no_z, &p5_no_z, false));
 
     /* Spot checks */
     base::Vector3d p6(5,5,0);
     base::Vector3d p7(2,3,0);
-    BOOST_CHECK_CLOSE(DBScan::euclidean_distance(p6, p7, true), 3.60555, 0.001);
+    BOOST_CHECK_CLOSE(DBScan::euclidean_distance(&p6, &p7, true), 3.60555, 0.001);
 
     base::Vector3d p8(5,5,-2);
     base::Vector3d p9(-2,3,-3);
-    BOOST_CHECK_CLOSE(DBScan::euclidean_distance(p8, p9, true), 7.34846, 0.001);
+    BOOST_CHECK_CLOSE(DBScan::euclidean_distance(&p8, &p9, true), 7.34846, 0.001);
 
     base::Vector3d p10(4,1,2);
     base::Vector3d p11(1,1,2);
-    BOOST_CHECK_EQUAL(DBScan::euclidean_distance(p10, p11, true), 3.0);
+    BOOST_CHECK_EQUAL(DBScan::euclidean_distance(&p10, &p11, true), 3.0);
 }
 
-BOOST_AUTO_TEST_CASE(clustering_test) {
+BOOST_AUTO_TEST_CASE(clustering_test_1) {
 
     /* Point naming scheme: p_<cluster_id>_<point_number> */
 
@@ -58,19 +61,27 @@ BOOST_AUTO_TEST_CASE(clustering_test) {
     base::Vector3d p_n_1(-5,  9, 0); // very far away from c_0
     base::Vector3d p_n_2(5.5, 6, 0); // almost in range of p_0_1
 
-    std::list<base::Vector3d> featureList;
-    featureList.push_back(p_0_0);
-    featureList.push_back(p_0_1);
-    featureList.push_back(p_0_2);
-    featureList.push_back(p_n_0);
-    featureList.push_back(p_n_1);
-    featureList.push_back(p_n_2);
+    std::list<base::Vector3d*> featureList;
+    featureList.push_back(&p_0_0);
+    featureList.push_back(&p_0_1);
+    featureList.push_back(&p_0_2);
+    featureList.push_back(&p_n_0);
+    featureList.push_back(&p_n_1);
+    featureList.push_back(&p_n_2);
 
     DBScan dbs(&featureList, 3, 3.0, false);
     std::map<base::Vector3d*, int> clustering = dbs.scan();
 
+    BOOST_CHECK_EQUAL(clustering.size(), featureList.size());
     BOOST_CHECK_EQUAL(dbs.getClusterCount(), 1);
     BOOST_CHECK_EQUAL(dbs.getNoiseCount(), 3);
+
+    BOOST_CHECK_EQUAL(clustering[&p_0_0],  0);
+    BOOST_CHECK_EQUAL(clustering[&p_0_1],  0);
+    BOOST_CHECK_EQUAL(clustering[&p_0_2],  0);
+    BOOST_CHECK_EQUAL(clustering[&p_n_0], -2);
+    BOOST_CHECK_EQUAL(clustering[&p_n_1], -2);
+    BOOST_CHECK_EQUAL(clustering[&p_n_2], -2);
 
 }
 
