@@ -48,7 +48,6 @@ BOOST_AUTO_TEST_CASE(euclidean_distance_test) {
 }
 
 BOOST_AUTO_TEST_CASE(clustering_test_1) {
-
     /* Point naming scheme: p_<cluster_id>_<point_number> */
 
     /* Cluster 0 */
@@ -82,7 +81,77 @@ BOOST_AUTO_TEST_CASE(clustering_test_1) {
     BOOST_CHECK_EQUAL(clustering[&p_n_0], -2);
     BOOST_CHECK_EQUAL(clustering[&p_n_1], -2);
     BOOST_CHECK_EQUAL(clustering[&p_n_2], -2);
+}
 
+BOOST_AUTO_TEST_CASE(clustering_test_2) {
+
+    base::Vector3d p_a(-2.5, -2.5, 0);
+    base::Vector3d p_b(-1.5, -1.0, 0);
+    base::Vector3d p_c(-0.3, -0.2, 0);
+    base::Vector3d p_d( 1.7,  1.5, 0);
+    base::Vector3d p_e( 2.0,  2.5, 0);
+    base::Vector3d p_f( 0.7, -0.5, 0);
+    base::Vector3d p_g(-0.9,  0.9, 0);
+
+    std::list<base::Vector3d*> featureList;
+    featureList.push_back(&p_a);
+    featureList.push_back(&p_b);
+    featureList.push_back(&p_c);
+    featureList.push_back(&p_d);
+    featureList.push_back(&p_e);
+    featureList.push_back(&p_f);
+    featureList.push_back(&p_g);
+
+    DBScan dbs(&featureList, 3, 3.0, false);
+    std::map<base::Vector3d*, int> clustering = dbs.scan();
+
+    BOOST_CHECK_EQUAL(clustering.size(), featureList.size());
+    BOOST_CHECK_EQUAL(dbs.getClusterCount(), 1);
+    BOOST_CHECK_EQUAL(dbs.getNoiseCount(), 0);
+
+    BOOST_CHECK_EQUAL(clustering[&p_a], 0);
+    BOOST_CHECK_EQUAL(clustering[&p_b], 0);
+    BOOST_CHECK_EQUAL(clustering[&p_c], 0);
+    BOOST_CHECK_EQUAL(clustering[&p_d], 0);
+    BOOST_CHECK_EQUAL(clustering[&p_e], 0);
+    BOOST_CHECK_EQUAL(clustering[&p_f], 0);
+    BOOST_CHECK_EQUAL(clustering[&p_g], 0);
+}
+
+BOOST_AUTO_TEST_CASE(clustering_test_only_noise) {
+
+    base::Vector3d p_a(-2.5, -2.5, 0);
+    base::Vector3d p_b( 4.5,  6.0, 0);
+    base::Vector3d p_c( 8.0, -12.5, 0);
+
+    std::list<base::Vector3d*> featureList;
+    featureList.push_back(&p_a);
+    featureList.push_back(&p_b);
+    featureList.push_back(&p_c);
+
+    DBScan dbs(&featureList, 3, 3.0, false);
+    std::map<base::Vector3d*, int> clustering = dbs.scan();
+
+    BOOST_CHECK_EQUAL(clustering.size(), featureList.size());
+    BOOST_CHECK_EQUAL(dbs.getClusterCount(), 0);
+    BOOST_CHECK_EQUAL(dbs.getNoiseCount(), 3);
+
+    BOOST_CHECK_EQUAL(clustering[&p_a], -2);
+    BOOST_CHECK_EQUAL(clustering[&p_b], -2);
+    BOOST_CHECK_EQUAL(clustering[&p_c], -2);
+}
+
+BOOST_AUTO_TEST_CASE(clustering_test_empty_pointcloud) {
+
+    std::list<base::Vector3d*> featureList;
+    BOOST_CHECK(featureList.empty());
+
+    DBScan dbs(&featureList, 3, 3.0, false);
+    std::map<base::Vector3d*, int> clustering = dbs.scan();
+
+    BOOST_CHECK_EQUAL(clustering.size(), featureList.size());
+    BOOST_CHECK_EQUAL(dbs.getClusterCount(), 0);
+    BOOST_CHECK_EQUAL(dbs.getNoiseCount(), 0);
 }
 
 // EOF
