@@ -16,6 +16,6 @@ BOOST_AUTO_TEST_CASE(getCentroid_test) {
     vec.push_back(&p1);
     vec.push_back(&p2);
     
-    base::Vector3d result = getCentroid(vec);
-    BOOST_CHECK_EQUAL(base::Vector3d(3,3,3), getCentroid(vec));
+    base::Vector3d result = centroid(vec);
+    BOOST_CHECK_EQUAL(base::Vector3d(3,3,3), centroid(vec));
 }

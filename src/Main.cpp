@@ -4,6 +4,7 @@
 #include <sstream>
 #include <cstdlib> // rand()
 #include <machine_learning/DBScan.hpp>
+#include <machine_learning/ClusteringUtils.hpp>
 
 std::list<base::Vector3d*>* pointCloud;
 
@@ -37,7 +38,7 @@ int main(int argc, char** argv)
     double dist = dbscan.euclidean_distance(p1, p2, false);
     std::cout << "Distance between p1 and p2: " << dist << std::endl;
     */
-/*
+
     std::map<base::Vector3d*, int>::iterator it;
     std::map<base::Vector3d*, int> clustering = dbscan.scan();
 
@@ -45,6 +46,6 @@ int main(int argc, char** argv)
     for(it = clustering.begin(); it != clustering.end(); it++) {
         std::cout << machine_learning::pointToString(*(*it).first) << " clustered as " << (*it).second << std::endl;
     }
-*/
+
 	return 0;
 }
