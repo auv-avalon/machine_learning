@@ -24,7 +24,7 @@ namespace machine_learning
 		/* This constructor sets up the whole DBScan (DB refers to "density based") clustering
 		 * environment. The featureList can be understood as a point cloud in the R^3 vector
 		 * space. Roughly, a cluster is defined by a "core point" ("Kernobjekt") having min_pts
-		 * points in its epsilon radius (self included). The cluster can be expanded, if points
+		 * points in its epsilon radius (self excluded). The cluster can be expanded, if points
 		 * in that radius are core points themselves. For the details, please refer to the mentioned
 		 * literature.
 		 * There are the following configuration parameters:
