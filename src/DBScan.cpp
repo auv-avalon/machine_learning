@@ -11,8 +11,6 @@ namespace machine_learning
         this->use_z = use_z;
         cluster_count = 0;
         number_of_points = 0;
-        std::cout << "DBScan parameters:\n" << "Epsilon: " << this->epsilon
-            << "\nMin_Pts: " << this->min_pts << std::endl;
         //initialize(); TODO Do we need this? Interferes with initialize() call in scan()
     }
 
