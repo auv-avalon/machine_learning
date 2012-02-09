@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(clustering_test_1) {
     featureList.push_back(&p_n_1);
     featureList.push_back(&p_n_2);
 
-    DBScan dbs(&featureList, 3, 3.0, false);
+    DBScan dbs(&featureList, 2, 3.0, false);
     std::map<base::Vector3d*, int> clustering = dbs.scan();
 
     BOOST_CHECK_EQUAL(clustering.size(), featureList.size());
@@ -118,6 +118,26 @@ BOOST_AUTO_TEST_CASE(clustering_test_2) {
     BOOST_CHECK_EQUAL(clustering[&p_g], 0);
 }
 
+BOOST_AUTO_TEST_CASE(clustering_test_3) {
+
+    base::Vector3d p_a(-2.5, 0, 0);
+    base::Vector3d p_b(-1.5, 0, 0);
+
+    std::list<base::Vector3d*> featureList;
+    featureList.push_back(&p_a);
+    featureList.push_back(&p_b);
+
+    DBScan dbs(&featureList, 1, 1.0, false);
+    std::map<base::Vector3d*, int> clustering = dbs.scan();
+
+    BOOST_CHECK_EQUAL(clustering.size(), featureList.size());
+    BOOST_CHECK_EQUAL(dbs.getClusterCount(), 1);
+    BOOST_CHECK_EQUAL(dbs.getNoiseCount(), 0);
+
+    BOOST_CHECK_EQUAL(clustering[&p_a], 0);
+    BOOST_CHECK_EQUAL(clustering[&p_b], 0);
+}
+/*
 BOOST_AUTO_TEST_CASE(clustering_test_only_noise) {
 
     base::Vector3d p_a(-2.5, -2.5, 0);

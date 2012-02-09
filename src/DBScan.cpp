@@ -115,6 +115,10 @@ namespace machine_learning
         std::list<base::Vector3d*>::iterator it;
         std::vector<base::Vector3d*> neighbors;
         for(it = featureList->begin(); it != featureList->end(); it++) {
+            if(*it == point) {
+                // Do not count yourself!
+                continue;
+            }
             if(euclidean_distance(point, *it) <= epsilon) {
                 neighbors.push_back(*it);
             }
