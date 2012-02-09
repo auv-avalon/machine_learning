@@ -173,5 +173,5 @@ BOOST_AUTO_TEST_CASE(clustering_test_empty_pointcloud) {
     BOOST_CHECK_EQUAL(dbs.getClusterCount(), 0);
     BOOST_CHECK_EQUAL(dbs.getNoiseCount(), 0);
 }
-
+*/
 // EOF
