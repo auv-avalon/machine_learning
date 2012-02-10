@@ -13,6 +13,7 @@ namespace machine_learning
 {
     /* This class implements the DBScan density based clustering algorithm for the specific use case of clustering obstacle points generated from sonar scan samples. For further information consult the following book:
      * Ester, M.; Sander, J.: Knowledge Discovery in Databases - Techniken und Anwendungen. 2000. Springer. Berlin.
+     * See also: http://en.wikipedia.org/wiki/DBSCAN
      */
     class DBScan
     {
@@ -35,7 +36,7 @@ namespace machine_learning
 		 * @param use_z   This flag defines whether to interpret the vector as 2D or 3D. If use_z is false, only the
 		 *                X and Y coordinates are concerned. This is equal to (X,Y,0).
 		 */
-		DBScan(std::list<base::Vector3d*>* featureList, unsigned int min_pts, double epsilon, bool use_z = false);
+		DBScan(std::list<base::Vector3d*>* featureList, unsigned int min_pts, double epsilon, bool use_z = false, bool use_dynamic_epsilon = false, double dynamic_epsilon_weight = 1.0);
 
 		/* Scans the pointcloud for clusters.
 		 */
@@ -56,6 +57,8 @@ namespace machine_learning
 		unsigned int min_pts;
 		double epsilon;
 		bool use_z;
+		bool use_dynamic_epsilon;
+		double dynamic_epsilon_weight;
 		std::list<base::Vector3d*>* featureList;
 
 		std::map<base::Vector3d*, int> clustering;

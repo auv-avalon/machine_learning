@@ -3,12 +3,15 @@
 
 namespace machine_learning
 {
-    DBScan::DBScan(std::list<base::Vector3d*>* featureList, unsigned int min_pts, double epsilon, bool use_z)
+    DBScan::DBScan(std::list<base::Vector3d*>* featureList, unsigned int min_pts, double epsilon, bool use_z, bool use_dynamic_epsilon, double dynamic_epsilon_weight)
     {
         this->featureList = featureList;
         this->min_pts = min_pts;
         this->epsilon = epsilon;
         this->use_z = use_z;
+        this->use_dynamic_epsilon = use_dynamic_epsilon;
+        this->dynamic_epsilon_weight = dynamic_epsilon_weight;
+
         cluster_count = 0;
         number_of_points = 0;
         //initialize(); TODO Do we need this? Interferes with initialize() call in scan()
@@ -117,7 +120,17 @@ namespace machine_learning
                 // Do not count yourself!
                 continue;
             }
-            if(euclidean_distance(point, *it) <= epsilon) {
+
+            /* Adjust epsilon value if desired */
+            double adjusted_epsilon = epsilon;
+
+            if(use_dynamic_epsilon) {
+                // Adjust epsilon depending on the distance between point and origin and the dynamic epsilon weight.
+                adjusted_epsilon = epsilon * euclidean_distance(&base::Vector3d(0,0,0), point) * dynamic_epsilon_weight;
+            }
+
+            // Check for neighbor
+            if(euclidean_distance(point, *it) <= adjusted_epsilon) {
                 neighbors.push_back(*it);
             }
         }
