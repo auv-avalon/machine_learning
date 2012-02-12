@@ -126,7 +126,8 @@ namespace machine_learning
 
             if(use_dynamic_epsilon) {
                 // Adjust epsilon depending on the distance between point and origin and the dynamic epsilon weight.
-                adjusted_epsilon = epsilon * euclidean_distance(&base::Vector3d(0,0,0), point) * dynamic_epsilon_weight;
+                base::Vector3d zero(0,0,0);
+                adjusted_epsilon = epsilon * euclidean_distance(&zero, point) * dynamic_epsilon_weight;
             }
 
             // Check for neighbor
