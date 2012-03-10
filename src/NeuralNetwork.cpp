@@ -92,7 +92,7 @@ void NeuralNetwork::initializeParameters(NeuralLayer* output)
                 next.push(*it);
         }
 
-        if(*it == input_layer)
+        if(layer == input_layer)
             input_nodes += inputs;
         
         layer->theta.resize(input_nodes, layer->NODES);

@@ -18,6 +18,7 @@ class NeuralNetwork {
      ~NeuralNetwork();
 
      const Vector& forward_propagation(const Vector& input);
+     void back_propagation(const Vector& x, const Vector& y);
 
  private:
      void initializeParameters(NeuralLayer* output);
