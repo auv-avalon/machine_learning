@@ -2,8 +2,6 @@
 
 #include <stdexcept>
 #include <math.h>
-#include <queue>
-#include <set>
 
 namespace machine_learning {
 
@@ -36,21 +34,7 @@ const Vector& NeuralNetwork::forward_propagation(const Vector& input)
         next_layer.pop();
         visit_layer.insert(layer);
 
-        Vector x(layer->theta.rows());
-        unsigned index = 0;
-        for(unsigned i = 0; i < input.rows(); i++) {
-            x(index) = input(i);
-            index++;
-        }
-
-
-        std::vector<NeuralLayer*>::iterator it;
-        for(it = layer->prev.begin(); it != layer->prev.end(); it++) { 
-            for(unsigned i = 0; i < (*it)->last_computation.rows(); i++) {
-                x(index) = (*it)->last_computation(i);
-                index++;
-            } 
-        }
+        std::vector<NeuralLayer*>::const_iterator it;
 
         for(it = layer->next.begin(); it != layer->next.end(); it++) {
             if(visit_layer.find(*it) == visit_layer.end()) {
@@ -58,46 +42,76 @@ const Vector& NeuralNetwork::forward_propagation(const Vector& input)
             }                
         }
 
-        Vector y = layer->theta.transpose() * x;
+        Vector y = (layer == input_layer) 
+            ? layer->theta.transpose() * layer->input_vector()
+            : layer->theta.transpose() * layer->input_vector(input);
 
         for(unsigned i = 0; i < y.rows(); i++) {
-            layer->last_computation(i) = layer->activation(y(i), layer->SCALE);
+            layer->computation(i) = layer->activation(y(i), layer->SCALE);
         }
     }
 
-    return output_layer->last_computation;
+    return output_layer->computation;
+}
+
+
+void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double alpha)
+{
+    const Vector& value = forward_propagation(x);
+}
+
+
+double NeuralNetwork::theta_sum() const
+{
+    std::queue<NeuralLayer*> next_layer;
+    std::set<NeuralLayer*> visit_layer;
+
+    next_layer.push(input_layer);
+    double sum = 0;
+
+    while( !next_layer.empty() ) {
+        std::vector<NeuralLayer*>::iterator it;
+
+        NeuralLayer* layer = next_layer.front();
+
+        sum += layer->theta.sum();
+            
+        visit_layer.insert(layer);
+        next_layer.pop();
+
+        for(it = layer->next.begin(); it != layer->next.end(); it++) {
+            if(visit_layer.find(*it) == visit_layer.end())
+                next_layer.push(*it);
+        }
+    }
+
+    return sum;
 }
 
 
 void NeuralNetwork::initializeParameters(NeuralLayer* output)
 {
-    std::queue<NeuralLayer*> next;
-    std::set<NeuralLayer*> visit;
+    std::queue<NeuralLayer*> next_layer;
+    std::set<NeuralLayer*> visit_layer;
 
-    next.push(output_layer);
+    next_layer.push(output_layer);
 
-    while( !next.empty() ) {
+    while( !next_layer.empty() ) {
         std::vector<NeuralLayer*>::iterator it;
 
-        NeuralLayer* layer = next.front();
+        NeuralLayer* layer = next_layer.front();
 
-        visit.insert(layer);
-        next.pop();
+        visit_layer.insert(layer);
+        next_layer.pop();
 
-        unsigned input_nodes = 0;
         for(it = layer->prev.begin(); it != layer->prev.end(); it++) {
-            input_nodes += (*it)->NODES;
-
-            if(visit.find(*it) == visit.end())
-                next.push(*it);
+            if(visit_layer.find(*it) == visit_layer.end())
+                next_layer.push(*it);
         }
 
-        if(layer == input_layer)
-            input_nodes += inputs;
-        
-        layer->theta.resize(input_nodes, layer->NODES);
+        layer->theta.resize(layer->input_dim, layer->NODES);
 
-        for(unsigned i = 0; i < input_nodes; i++)
+        for(unsigned i = 0; i < layer->input_dim; i++)
             for(unsigned j = 0; j < layer->NODES; j++)
                 layer->theta(i,j) = initializer();
     }
@@ -105,7 +119,7 @@ void NeuralNetwork::initializeParameters(NeuralLayer* output)
 
 
 NeuralLayer::NeuralLayer(unsigned nodes, double scale, Type type, bool bias)
-    : NODES(nodes), BIAS(bias), SCALE(scale)
+    : NODES(nodes), BIAS(bias), SCALE(scale), input_dim(0)
 {
     switch(type) {
         case TANH:
@@ -130,11 +144,70 @@ NeuralLayer::~NeuralLayer()
 {
 }
 
+const Vector& NeuralLayer::last_computation() 
+{
+    return computation;
+}
+
+
+Vector NeuralLayer::input_vector(const Vector& inputs)
+{
+    std::vector<NeuralLayer*>::iterator it;
+
+    Vector input(input_dim + inputs.rows(), 1);
+
+    unsigned index = 0;
+
+    for(unsigned i = 0; i < inputs.rows(); i++)
+        input(index++) =  inputs(i);
+    
+    for(it = prev.begin(); it != prev.end(); it++) {
+        Vector v = (*it)->last_computation();
+
+        for(unsigned i = 0; i < v.rows(); i++) 
+            input(index++) = v(i);
+    }
+
+    return input;
+}
+
+
+Vector NeuralLayer::input_vector()
+{
+    std::vector<NeuralLayer*>::iterator it;
+
+    Vector input(input_dim, 1);
+
+    unsigned index = 0;
+    
+    for(it = prev.begin(); it != prev.end(); it++) {
+        Vector v = (*it)->last_computation();
+
+        for(unsigned i = 0; i < v.rows(); i++) 
+            input(index++) = v(i);
+    }
+
+    return input;
+}
+
+
+Vector NeuralLayer::error_vector(const Vector& y)
+{
+    return computation - y;
+}
+
+
+void NeuralLayer::reset_output_vector(const Vector& vector)
+{
+    computation = vector;
+}
+
 
 void NeuralLayer::connect_to(NeuralLayer* layer)
 {
     layer->prev.push_back(this);
     this->next.push_back(layer);
+    this->input_dim += layer->NODES;
 }
 
 

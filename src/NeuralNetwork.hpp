@@ -3,6 +3,9 @@
 
 #include <Eigen/Core>
 #include <vector>
+#include <queue>
+#include <set>
+#include <map>
 #include "RandomNumbers.hpp"
 
 namespace machine_learning {
@@ -18,7 +21,9 @@ class NeuralNetwork {
      ~NeuralNetwork();
 
      const Vector& forward_propagation(const Vector& input);
-     void back_propagation(const Vector& x, const Vector& y);
+     void back_propagation(const Vector& x, const Vector& y, double alpha);
+
+     double theta_sum() const;
 
  private:
      void initializeParameters(NeuralLayer* output);
@@ -28,6 +33,7 @@ class NeuralNetwork {
      NeuralLayer* output_layer;
      unsigned inputs;
      NormalRandom initializer;
+
 };
 
 
@@ -47,6 +53,13 @@ class NeuralLayer {
 
     void  connect_to(NeuralLayer* layer);
 
+    const Vector& last_computation();
+    Vector input_vector(const Vector& inputs);
+    Vector input_vector();
+    Vector error_vector(const Vector& vector);
+
+    void reset_output_vector(const Vector& vector);
+
     const unsigned NODES;
     const bool BIAS;
     const double SCALE;
@@ -56,7 +69,11 @@ class NeuralLayer {
     Derivative derivative;
 
     ParamMatrix theta;
-    Vector last_computation;
+    Vector computation;
+    Vector error;
+
+    unsigned input_dim;
+    
     std::vector<NeuralLayer*> prev;
     std::vector<NeuralLayer*> next;
 
