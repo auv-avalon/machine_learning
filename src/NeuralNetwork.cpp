@@ -17,9 +17,7 @@ NeuralNetwork::NeuralNetwork(unsigned inputs, double variance, NeuralLayer* inpu
 
 
 NeuralNetwork::~NeuralNetwork()
-{
-    // TODO: Release all layers
-}
+{}
 
 
 const Vector& NeuralNetwork::forward_propagation(const Vector& input)
@@ -58,6 +56,45 @@ const Vector& NeuralNetwork::forward_propagation(const Vector& input)
 void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double alpha)
 {
     const Vector& value = forward_propagation(x);
+
+    std::queue<NeuralLayer*> next_layer;
+    std::set<NeuralLayer*> visit_layer;
+    std::vector<NeuralLayer*>::iterator it;
+
+    next_layer.push(output_layer);
+
+    while(!next_layer.empty()) {
+        NeuralLayer* layer = next_layer.front();
+
+        visit_layer.insert(layer);
+        next_layer.pop();
+
+        for(it = layer->next.begin(); it != layer->next.end(); it++) {
+            if(visit_layer.find(*it) == visit_layer.end())
+                next_layer.push(*it);
+        }
+
+
+        if(layer == output_layer) {
+            Vector delta = value - x;
+            for(unsigned i = 0; i < delta.rows(); i++) {
+                delta(i) = layer->derivative(delta(i), layer->SCALE);
+            }
+        } else {
+            /*
+            Vector input_v = (layer == input_layer) 
+                ? derivative(layer->input_vector(x))
+                : derivative(layer->input_vector());
+
+            Vector full_error(layer->NODES, 1);
+            unsigned index = 0;
+            for(it = layer->next.begin(); it != layer->next.end(); it++) {
+                for(unsigned i = 0; i < (*it)->error.rows(); i++)
+                    full_error(index++) = (*it)->error(i);
+            }
+            */
+        }
+    }
 }
 
 
@@ -65,12 +102,12 @@ double NeuralNetwork::theta_sum() const
 {
     std::queue<NeuralLayer*> next_layer;
     std::set<NeuralLayer*> visit_layer;
+    std::vector<NeuralLayer*>::iterator it;
 
     next_layer.push(input_layer);
     double sum = 0;
 
     while( !next_layer.empty() ) {
-        std::vector<NeuralLayer*>::iterator it;
 
         NeuralLayer* layer = next_layer.front();
 
