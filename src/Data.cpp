@@ -1,9 +1,15 @@
 #include "Data.hpp"
 #include <stdlib.h>
+#include <stdarg.h>
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 
 namespace machine_learning {
+
+Data::Data(std::istream& inputstream)
+{
+    inputstream >> *this;
+}
 
 
 Data::Data()
@@ -39,8 +45,6 @@ std::istream& operator>>(std::istream& in, Data& data) {
 
     data.resize(lines.size(), numbers.size());
 
-    std::cout << data.rows() << " " << data.cols() << std::endl;
-
     numbers.clear();
 
     for(unsigned j = 0; j < lines.size(); j++) {
@@ -49,8 +53,6 @@ std::istream& operator>>(std::istream& in, Data& data) {
         for(unsigned i = 0; i < numbers.size(); i++) {
             boost::trim(numbers[i]);
             data(j, i) = atof(numbers[i].c_str());
-
-            std::cout << j << "," << i << ":" << data(j,i) << std::endl;
         }
 
         numbers.clear();

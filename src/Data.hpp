@@ -7,6 +7,7 @@
 
 namespace machine_learning {
 
+typedef Eigen::Matrix<double, Eigen::Dynamic, 1> Vector;
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> DataMatrix;
 
 class Data : public DataMatrix {
@@ -15,6 +16,8 @@ class Data : public DataMatrix {
     friend std::istream& operator>>(std::istream& in, Data& data);
 
     Data();
+    Data(std::istream& inputstream);
+    Data(unsigned rows, unsigned cols) : DataMatrix(rows, cols) {};
     Data(const DataMatrix& matrix) : DataMatrix(matrix) {}
     ~Data();
 
