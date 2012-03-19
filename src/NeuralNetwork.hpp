@@ -7,10 +7,10 @@
 #include <set>
 #include <map>
 #include "RandomNumbers.hpp"
+#include "Data.hpp"
 
 namespace machine_learning {
 
-typedef Eigen::Matrix<double, Eigen::Dynamic, 1> Vector;
 typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> ParamMatrix;
 
 class NeuralLayer;
@@ -84,6 +84,9 @@ class NeuralLayer {
     static double _tanh_derivative(double x, double scale);
     static double _linear(double x, double scale);
     static double _linear_derivative(double x, double scale);
+
+    Vector derivative_cmpwise(const Vector& v) const;
+    Vector activation_cmpwise(const Vector& v) const;
 };
 
 

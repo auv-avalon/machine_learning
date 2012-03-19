@@ -1,5 +1,6 @@
 #include "NeuralNetwork.hpp"
 
+#include <boost/assert.hpp>
 #include <stdexcept>
 #include <math.h>
 
@@ -22,6 +23,9 @@ NeuralNetwork::~NeuralNetwork()
 
 const Vector& NeuralNetwork::forward_propagation(const Vector& input)
 {
+    BOOST_ASSERT_MSG(input.rows() == inputs && input.cols() == 1, 
+            "Input vector dimension is wrong for this forward propagation");
+
     std::queue<NeuralLayer*> next_layer;
     std::set<NeuralLayer*> visit_layer;
 
@@ -40,13 +44,20 @@ const Vector& NeuralNetwork::forward_propagation(const Vector& input)
             }                
         }
 
-        Vector y = (layer == input_layer) 
-            ? layer->theta.transpose() * layer->input_vector()
-            : layer->theta.transpose() * layer->input_vector(input);
+        Vector y;
+        if(layer == input_layer) {
+            BOOST_ASSERT_MSG(layer->theta.transpose().cols() == layer->input_vector(input).rows(), 
+                    "Dimension for parameter matrix and input vector in forward propagation mismatched");
 
-        for(unsigned i = 0; i < y.rows(); i++) {
-            layer->computation(i) = layer->activation(y(i), layer->SCALE);
+            y = layer->theta.transpose() * layer->input_vector(input);
+        } else {
+            BOOST_ASSERT_MSG(layer->theta.transpose().cols() == layer->input_vector().rows(), 
+                    "Dimension for parameter matrix and input vector in forward propagation mismatched");
+
+            y = layer->theta.transpose() * layer->input_vector();
         }
+
+        layer->computation = layer->activation_cmpwise(y);
     }
 
     return output_layer->computation;
@@ -55,7 +66,13 @@ const Vector& NeuralNetwork::forward_propagation(const Vector& input)
 
 void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double alpha)
 {
+    BOOST_ASSERT_MSG(x.rows() == inputs && x.cols() == 1,
+            "Input vector dimension is wrong for this back propagation");
+
     const Vector& value = forward_propagation(x);
+
+    BOOST_ASSERT_MSG(value.rows() == y.rows() && value.cols() == y.cols(),
+            "Dimension for forward propagations output vector and the given training simple mismatched");
 
     std::queue<NeuralLayer*> next_layer;
     std::set<NeuralLayer*> visit_layer;
@@ -69,31 +86,50 @@ void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double al
         visit_layer.insert(layer);
         next_layer.pop();
 
-        for(it = layer->next.begin(); it != layer->next.end(); it++) {
+        for(it = layer->prev.begin(); it != layer->prev.end(); it++) {
             if(visit_layer.find(*it) == visit_layer.end())
                 next_layer.push(*it);
         }
 
 
         if(layer == output_layer) {
-            Vector delta = value - x;
-            for(unsigned i = 0; i < delta.rows(); i++) {
-                delta(i) = layer->derivative(delta(i), layer->SCALE);
-            }
+            layer->error = (value - y).cwiseProduct(layer->derivative_cmpwise(layer->computation));
         } else {
-            /*
-            Vector input_v = (layer == input_layer) 
-                ? derivative(layer->input_vector(x))
-                : derivative(layer->input_vector());
+            // case for connection to multiple successor layers
+            if(layer->next.size() > 1) {
+                // TODO:
+            } else {
+                NeuralLayer* succ = layer->next.front();
 
-            Vector full_error(layer->NODES, 1);
-            unsigned index = 0;
-            for(it = layer->next.begin(); it != layer->next.end(); it++) {
-                for(unsigned i = 0; i < (*it)->error.rows(); i++)
-                    full_error(index++) = (*it)->error(i);
+                BOOST_ASSERT_MSG(succ->theta.cols() == succ->error.rows(),
+                        "Dimension for parameter matrix and error vector in back propgation mismatched");
+
+                layer->error = (succ->theta * succ->error).cwiseProduct(
+                        layer->derivative_cmpwise(layer->computation));
             }
-            */
         }
+    }
+
+    // update all weights in this network
+    visit_layer.clear();
+    next_layer.push(input_layer);
+    while(!next_layer.empty()) {
+        NeuralLayer* layer = next_layer.front();
+
+        visit_layer.insert(layer);
+        next_layer.pop();
+
+        for(it = layer->next.begin(); it != layer->next.end(); it++) {
+            if(visit_layer.find(*it) == visit_layer.end())
+                next_layer.push(*it);
+        }
+
+        Vector in = (layer == input_layer) ? layer->input_vector(x) : layer->input_vector();
+
+        BOOST_ASSERT_MSG(in.cols() == layer->error.cols(),
+                "Dimension mismatch in parameter update");
+
+        layer->theta += alpha * in * -layer->error.transpose();
     }
 }
 
@@ -146,6 +182,9 @@ void NeuralNetwork::initializeParameters(NeuralLayer* output)
                 next_layer.push(*it);
         }
 
+        if(layer == input_layer)
+            layer->input_dim += inputs;
+
         layer->theta.resize(layer->input_dim, layer->NODES);
 
         for(unsigned i = 0; i < layer->input_dim; i++)
@@ -191,7 +230,7 @@ Vector NeuralLayer::input_vector(const Vector& inputs)
 {
     std::vector<NeuralLayer*>::iterator it;
 
-    Vector input(input_dim + inputs.rows(), 1);
+    Vector input(input_dim, 1);
 
     unsigned index = 0;
 
@@ -242,9 +281,13 @@ void NeuralLayer::reset_output_vector(const Vector& vector)
 
 void NeuralLayer::connect_to(NeuralLayer* layer)
 {
+    if(this->next.size() > 0) {
+        throw std::runtime_error("Multiple successor layers are currently not supported");
+    }
+
     layer->prev.push_back(this);
+    layer->input_dim += this->NODES;
     this->next.push_back(layer);
-    this->input_dim += layer->NODES;
 }
 
 
@@ -282,6 +325,30 @@ double NeuralLayer::_linear_derivative(double x, double scale)
 {
     return scale;
 }
+
+
+Vector NeuralLayer::derivative_cmpwise(const Vector& v) const
+{
+    Vector r(v.rows(), 1);
+    for(unsigned index = 0; index < v.rows(); index++) {
+        r(index) = this->derivative(v(index), SCALE);
+    }
+
+    return r;
+}
+
+
+Vector NeuralLayer::activation_cmpwise(const Vector& v) const
+{
+    Vector r(v.rows(), 1);
+    for(unsigned index = 0; index < v.rows(); index++) {
+        r(index) = this->activation(v(index), SCALE);
+    }
+
+    return r;
+}
+
+
 
 
 }
