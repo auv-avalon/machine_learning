@@ -14,11 +14,11 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    NeuralLayer* input = new NeuralLayer(10);
-    NeuralLayer* output = new NeuralLayer(1, 1.0, NeuralLayer::LINEAR);
+    NeuralLayer* input = new NeuralLayer(10, 1.0, NeuralLayer::TANH, true);
+    NeuralLayer* output = new NeuralLayer(1, 1.0, NeuralLayer::LINEAR, true);
     input->connect_to(output);
 
-    NeuralNetwork nn(2, 1.0, input, output);
+    NeuralNetwork nn(1, 1.0, input, output);
 
     std::fstream file(argv[1]);
 
@@ -32,9 +32,7 @@ int main(int argc, char** argv)
     do {
         conv = nn.theta_sum();
         for(unsigned i = 0; i < input_data.rows(); i++) {
-            Vector x(2, 1);
-            x << 1.0, input_data(i, 0);
-            
+            Vector x = Vector::Constant(1, 1, input_data(i, 0));
             Vector t = input_data.block(i, input_data.cols() - 1, 1, 1);
 
             nn.back_propagation(x, t, 0.01);
@@ -46,10 +44,7 @@ int main(int argc, char** argv)
 
     unsigned row = 0;
     for(double x = 0.0; x <= 1.0; x += 0.01) {
-        Vector r(2, 1);
-        r << 1.0, x;
-
-        Vector y = nn.forward_propagation(r);
+        Vector y = nn.forward_propagation(Vector::Constant(1, 1, x));
 
         output_data(row, 0) = x;
         output_data(row, 1) = y(0);

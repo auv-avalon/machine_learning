@@ -104,8 +104,10 @@ void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double al
                 BOOST_ASSERT_MSG(succ->theta.cols() == succ->error.rows(),
                         "Dimension for parameter matrix and error vector in back propgation mismatched");
 
-                layer->error = (succ->theta * succ->error).cwiseProduct(
-                        layer->derivative_cmpwise(layer->computation));
+                Vector p = (succ->theta * succ->error);
+                Vector reduce = succ->BIAS ? p.block(1, 0, p.rows() - 1, 1) : p;
+
+                layer->error = (reduce).cwiseProduct(layer->derivative_cmpwise(layer->computation));
             }
         }
     }
@@ -185,6 +187,9 @@ void NeuralNetwork::initializeParameters(NeuralLayer* output)
         if(layer == input_layer)
             layer->input_dim += inputs;
 
+        if(layer->BIAS)
+            layer->input_dim++;
+
         layer->theta.resize(layer->input_dim, layer->NODES);
 
         for(unsigned i = 0; i < layer->input_dim; i++)
@@ -234,6 +239,10 @@ Vector NeuralLayer::input_vector(const Vector& inputs)
 
     unsigned index = 0;
 
+    if(BIAS) {
+        input(index++) = 1.0;
+    }
+
     for(unsigned i = 0; i < inputs.rows(); i++)
         input(index++) =  inputs(i);
     
@@ -255,6 +264,10 @@ Vector NeuralLayer::input_vector()
     Vector input(input_dim, 1);
 
     unsigned index = 0;
+
+    if(BIAS) {
+        input(index++) = 1.0;
+    }
     
     for(it = prev.begin(); it != prev.end(); it++) {
         Vector v = (*it)->last_computation();
