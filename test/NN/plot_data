@@ -1,0 +1,5 @@
+#!/usr/bin/gnuplot
+
+plot "sin.data" using 1:2 title 'sinus', "train.data" using 1:2 title 'nn' with lines
+
+pause -1 "Hit return for quitting"
