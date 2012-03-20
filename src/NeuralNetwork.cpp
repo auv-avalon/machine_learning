@@ -98,6 +98,9 @@ const Vector& NeuralNetwork::forward_propagation(const Vector& input)
             y = layer->theta.transpose() * layer->input_vector();
         }
 
+        if(layer->CACHING)
+            layer->cache = layer->computation;
+
         layer->computation = layer->activation_cmpwise(y);
 
         ++it;
@@ -157,6 +160,9 @@ void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double al
 
         layer->theta += alpha * in * -layer->error.transpose();
 
+        if(layer->CACHING)
+            layer->computation = layer->cache;
+
         ++it;
     }
 }
@@ -206,8 +212,12 @@ void NeuralNetwork::reset_parameters(double variance)
 }
 
 
-NeuralLayer::NeuralLayer(unsigned nodes, double scale, Type type, bool bias)
-    : NODES(nodes), BIAS(bias), SCALE(scale), input_dim(0)
+NeuralLayer::NeuralLayer(unsigned nodes, double scale, Type type, unsigned prop)
+    : NODES(nodes), 
+      BIAS((prop & USE_BIAS) == USE_BIAS), 
+      CACHING((prop & USE_CACHING) == USE_CACHING), 
+      SCALE(scale),
+      input_dim(0)
 {
     switch(type) {
         case TANH:
@@ -284,12 +294,6 @@ Vector NeuralLayer::input_vector()
     }
 
     return input;
-}
-
-
-Vector NeuralLayer::error_vector(const Vector& y)
-{
-    return computation - y;
 }
 
 

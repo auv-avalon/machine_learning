@@ -14,8 +14,8 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    NeuralLayer* input = new NeuralLayer(10, 1.0, NeuralLayer::TANH, true);
-    NeuralLayer* output = new NeuralLayer(1, 1.0, NeuralLayer::LINEAR, true);
+    NeuralLayer* input = new NeuralLayer(10, 1.0, NeuralLayer::TANH, NeuralLayer::USE_BIAS);
+    NeuralLayer* output = new NeuralLayer(1, 1.0, NeuralLayer::LINEAR, NeuralLayer::USE_BIAS);
     input->connect_to(output);
 
     NeuralNetwork nn(1, 1.0, input, output);

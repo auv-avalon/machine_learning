@@ -64,7 +64,13 @@ class NeuralLayer {
         TANH, SIGMOID, LINEAR
     };
 
-    NeuralLayer(unsigned nodes, double scale = 1.0, Type type = TANH, bool bias = false);
+    enum Properties {
+        USE_NONE = 0,
+        USE_BIAS = 1, 
+        USE_CACHING = 2
+    };
+
+    NeuralLayer(unsigned nodes, double scale = 1.0, Type type = TANH, unsigned flags = USE_NONE);
     ~NeuralLayer();
 
     void  connect_to(NeuralLayer* layer);
@@ -72,12 +78,12 @@ class NeuralLayer {
     const Vector& last_computation();
     Vector input_vector(const Vector& inputs);
     Vector input_vector();
-    Vector error_vector(const Vector& vector);
 
     void reset_output_vector(const Vector& vector);
 
     const unsigned NODES;
     const bool BIAS;
+    const bool CACHING;
     const double SCALE;
 
  private:
@@ -87,6 +93,7 @@ class NeuralLayer {
     ParamMatrix theta;
     Vector computation;
     Vector error;
+    Vector cache;
 
     unsigned input_dim;
     
