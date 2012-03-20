@@ -7,18 +7,71 @@
 namespace machine_learning {
 
 NeuralNetwork::NeuralNetwork(unsigned inputs, double variance, NeuralLayer* input, NeuralLayer* output)
-    : initializer(Random::gaussian(0.0, variance))
 {
     this->input_layer = input;
     this->output_layer = output;
     this->inputs = inputs;
 
-    initializeParameters(output);
+    reset_parameters(variance);
 }
 
 
 NeuralNetwork::~NeuralNetwork()
 {}
+
+
+NeuralNetwork::iterator::iterator(bool reverse, NeuralLayer* layer) 
+  : reverse(reverse)
+{
+    next_layer.push(layer);
+}
+
+NeuralNetwork::iterator& NeuralNetwork::iterator::operator++()
+{
+    NeuralLayer* layer = next_layer.front();
+    next_layer.pop();
+    visit_layer.insert(layer);
+
+    std::vector<NeuralLayer*>::iterator it;
+
+    if(!reverse) {
+        for(it = layer->next.begin(); it != layer->next.end(); it++) {
+            if(visit_layer.find(*it) == visit_layer.end())
+                next_layer.push(*it);
+        }
+    } else {
+        for(it = layer->prev.begin(); it != layer->prev.end(); it++) {
+            if(visit_layer.find(*it) == visit_layer.end())
+                next_layer.push(*it);
+        }
+    }
+
+    return *this;
+}
+
+
+NeuralLayer* NeuralNetwork::iterator::operator*()
+{
+    return next_layer.front();
+}
+
+
+bool NeuralNetwork::iterator::has_layer()
+{
+    return !next_layer.empty();
+}
+
+
+NeuralNetwork::iterator NeuralNetwork::breadth_first()
+{
+    return iterator(false, input_layer);
+}
+
+
+NeuralNetwork::iterator NeuralNetwork::breadth_first_reverse()
+{
+    return iterator(true, output_layer);
+}
 
 
 const Vector& NeuralNetwork::forward_propagation(const Vector& input)
@@ -136,53 +189,32 @@ void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double al
 }
 
 
-double NeuralNetwork::theta_sum() const
+double NeuralNetwork::theta_sum()
 {
-    std::queue<NeuralLayer*> next_layer;
-    std::set<NeuralLayer*> visit_layer;
-    std::vector<NeuralLayer*>::iterator it;
-
-    next_layer.push(input_layer);
     double sum = 0;
 
-    while( !next_layer.empty() ) {
+    NeuralNetwork::iterator it = breadth_first();
 
-        NeuralLayer* layer = next_layer.front();
+    while(it.has_layer()) {
+        NeuralLayer* layer = *it;
 
         sum += layer->theta.sum();
-            
-        visit_layer.insert(layer);
-        next_layer.pop();
 
-        for(it = layer->next.begin(); it != layer->next.end(); it++) {
-            if(visit_layer.find(*it) == visit_layer.end())
-                next_layer.push(*it);
-        }
+        ++it;
     }
 
     return sum;
 }
 
 
-void NeuralNetwork::initializeParameters(NeuralLayer* output)
+void NeuralNetwork::reset_parameters(double variance)
 {
-    std::queue<NeuralLayer*> next_layer;
-    std::set<NeuralLayer*> visit_layer;
+    NormalRandom initializer = Random::gaussian(0.0, variance);
 
-    next_layer.push(output_layer);
+    NeuralNetwork::iterator it = breadth_first_reverse();
 
-    while( !next_layer.empty() ) {
-        std::vector<NeuralLayer*>::iterator it;
-
-        NeuralLayer* layer = next_layer.front();
-
-        visit_layer.insert(layer);
-        next_layer.pop();
-
-        for(it = layer->prev.begin(); it != layer->prev.end(); it++) {
-            if(visit_layer.find(*it) == visit_layer.end())
-                next_layer.push(*it);
-        }
+    while(it.has_layer()) {
+        NeuralLayer* layer = *it;
 
         if(layer == input_layer)
             layer->input_dim += inputs;
@@ -195,6 +227,8 @@ void NeuralNetwork::initializeParameters(NeuralLayer* output)
         for(unsigned i = 0; i < layer->input_dim; i++)
             for(unsigned j = 0; j < layer->NODES; j++)
                 layer->theta(i,j) = initializer();
+
+        ++it;
     }
 }
 

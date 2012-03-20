@@ -23,17 +23,33 @@ class NeuralNetwork {
      const Vector& forward_propagation(const Vector& input);
      void back_propagation(const Vector& x, const Vector& y, double alpha);
 
-     double theta_sum() const;
+     void reset_parameters(double variance);
+
+     double theta_sum();
 
  private:
-     void initializeParameters(NeuralLayer* output);
+     class iterator {
+       public:
+          iterator(bool reverse, NeuralLayer* layer);
+
+          iterator& operator++();
+          NeuralLayer* operator*();
+
+          bool has_layer();
+
+       private:
+          std::queue<NeuralLayer*> next_layer;
+          std::set<NeuralLayer*> visit_layer;
+          bool reverse;
+     };
+
+     iterator breadth_first();
+     iterator breadth_first_reverse();
 
  private:
      NeuralLayer* input_layer;
      NeuralLayer* output_layer;
      unsigned inputs;
-     NormalRandom initializer;
-
 };
 
 
