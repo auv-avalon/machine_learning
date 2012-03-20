@@ -26,6 +26,7 @@ NeuralNetwork::iterator::iterator(bool reverse, NeuralLayer* layer)
     next_layer.push(layer);
 }
 
+
 NeuralNetwork::iterator& NeuralNetwork::iterator::operator++()
 {
     NeuralLayer* layer = next_layer.front();
@@ -79,23 +80,10 @@ const Vector& NeuralNetwork::forward_propagation(const Vector& input)
     BOOST_ASSERT_MSG(input.rows() == inputs && input.cols() == 1, 
             "Input vector dimension is wrong for this forward propagation");
 
-    std::queue<NeuralLayer*> next_layer;
-    std::set<NeuralLayer*> visit_layer;
+    NeuralNetwork::iterator it = breadth_first();
 
-    next_layer.push(input_layer);
-
-    while( !next_layer.empty() ) {
-        NeuralLayer* layer = next_layer.front();
-        next_layer.pop();
-        visit_layer.insert(layer);
-
-        std::vector<NeuralLayer*>::const_iterator it;
-
-        for(it = layer->next.begin(); it != layer->next.end(); it++) {
-            if(visit_layer.find(*it) == visit_layer.end()) {
-                next_layer.push(*it);
-            }                
-        }
+    while(it.has_layer()) {
+        NeuralLayer* layer = *it;
 
         Vector y;
         if(layer == input_layer) {
@@ -111,6 +99,8 @@ const Vector& NeuralNetwork::forward_propagation(const Vector& input)
         }
 
         layer->computation = layer->activation_cmpwise(y);
+
+        ++it;
     }
 
     return output_layer->computation;
@@ -127,23 +117,10 @@ void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double al
     BOOST_ASSERT_MSG(value.rows() == y.rows() && value.cols() == y.cols(),
             "Dimension for forward propagations output vector and the given training simple mismatched");
 
-    std::queue<NeuralLayer*> next_layer;
-    std::set<NeuralLayer*> visit_layer;
-    std::vector<NeuralLayer*>::iterator it;
+    NeuralNetwork::iterator it = breadth_first_reverse();
 
-    next_layer.push(output_layer);
-
-    while(!next_layer.empty()) {
-        NeuralLayer* layer = next_layer.front();
-
-        visit_layer.insert(layer);
-        next_layer.pop();
-
-        for(it = layer->prev.begin(); it != layer->prev.end(); it++) {
-            if(visit_layer.find(*it) == visit_layer.end())
-                next_layer.push(*it);
-        }
-
+    while(it.has_layer()) {
+        NeuralLayer* layer = *it;
 
         if(layer == output_layer) {
             layer->error = (value - y).cwiseProduct(layer->derivative_cmpwise(layer->computation));
@@ -151,6 +128,7 @@ void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double al
             // case for connection to multiple successor layers
             if(layer->next.size() > 1) {
                 // TODO:
+                throw std::runtime_error("multiple successor layers currently not supported");
             } else {
                 NeuralLayer* succ = layer->next.front();
 
@@ -163,21 +141,14 @@ void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double al
                 layer->error = (reduce).cwiseProduct(layer->derivative_cmpwise(layer->computation));
             }
         }
+
+        ++it;
     }
 
-    // update all weights in this network
-    visit_layer.clear();
-    next_layer.push(input_layer);
-    while(!next_layer.empty()) {
-        NeuralLayer* layer = next_layer.front();
+    it = breadth_first();
 
-        visit_layer.insert(layer);
-        next_layer.pop();
-
-        for(it = layer->next.begin(); it != layer->next.end(); it++) {
-            if(visit_layer.find(*it) == visit_layer.end())
-                next_layer.push(*it);
-        }
+    while(it.has_layer()) {
+        NeuralLayer* layer = *it;
 
         Vector in = (layer == input_layer) ? layer->input_vector(x) : layer->input_vector();
 
@@ -185,6 +156,8 @@ void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double al
                 "Dimension mismatch in parameter update");
 
         layer->theta += alpha * in * -layer->error.transpose();
+
+        ++it;
     }
 }
 
