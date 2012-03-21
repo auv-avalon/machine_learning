@@ -6,13 +6,11 @@
 
 namespace machine_learning {
 
-NeuralNetwork::NeuralNetwork(unsigned inputs, double variance, NeuralLayer* input, NeuralLayer* output)
+NeuralNetwork::NeuralNetwork(unsigned inputs, NeuralLayer* input, NeuralLayer* output)
 {
     this->input_layer = input;
     this->output_layer = output;
     this->inputs = inputs;
-
-    reset_parameters(variance);
 }
 
 

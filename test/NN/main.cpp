@@ -18,7 +18,8 @@ int main(int argc, char** argv)
     NeuralLayer* output = new NeuralLayer(1, 1.0, NeuralLayer::LINEAR, NeuralLayer::USE_BIAS);
     input->connect_to(output);
 
-    NeuralNetwork nn(1, 1.0, input, output);
+    NeuralNetwork nn(1, input, output);
+    nn.reset_parameters(1.0);
 
     std::fstream file(argv[1]);
 

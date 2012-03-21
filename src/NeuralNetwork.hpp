@@ -17,7 +17,7 @@ class NeuralLayer;
 
 class NeuralNetwork {
  public:
-     NeuralNetwork(unsigned inputs, double variance, NeuralLayer* input, NeuralLayer* output);
+     NeuralNetwork(unsigned inputs, NeuralLayer* input, NeuralLayer* output);
      ~NeuralNetwork();
 
      const Vector& forward_propagation(const Vector& input);
@@ -27,7 +27,6 @@ class NeuralNetwork {
 
      double theta_sum();
 
- private:
      class iterator {
        public:
           iterator(bool reverse, NeuralLayer* layer);
@@ -80,6 +79,8 @@ class NeuralLayer {
     Vector input_vector();
 
     void reset_output_vector(const Vector& vector);
+
+    ParamMatrix& parameters() { return theta; }
 
     const unsigned NODES;
     const bool BIAS;
