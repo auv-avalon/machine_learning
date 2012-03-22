@@ -1,6 +1,22 @@
+set(CPP
+    DBScan.cpp
+    RandomNumbers.cpp
+    NeuralNetwork.cpp
+    Data.cpp
+    )
+
+set(HPP
+    DBScan.hpp
+    ClusteringUtils.hpp
+    GaussianParameters.hpp
+    RandomNumbers.hpp
+    NeuralNetwork.hpp
+    Data.hpp
+    )
+
 rock_library(machine_learning
-    SOURCES DBScan.cpp RandomNumbers.cpp NeuralNetwork.cpp Data.cpp
-    HEADERS DBScan.hpp ClusteringUtils.hpp RandomNumbers.hpp NeuralNetwork.hpp Data.hpp)
+    SOURCES ${CPP}
+    HEADERS ${HPP})
 
 rock_executable(machine_learning_bin Main.cpp
     DEPS machine_learning
