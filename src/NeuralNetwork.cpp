@@ -75,8 +75,7 @@ NeuralNetwork::iterator NeuralNetwork::breadth_first_reverse()
 
 const Vector& NeuralNetwork::forward_propagation(const Vector& input)
 {
-    BOOST_ASSERT_MSG(input.rows() == inputs && input.cols() == 1, 
-            "Input vector dimension is wrong for this forward propagation");
+    BOOST_ASSERT(input.rows() == inputs && input.cols() == 1);
 
     NeuralNetwork::iterator it = breadth_first();
 
@@ -85,13 +84,11 @@ const Vector& NeuralNetwork::forward_propagation(const Vector& input)
 
         Vector y;
         if(layer == input_layer) {
-            BOOST_ASSERT_MSG(layer->theta.transpose().cols() == layer->input_vector(input).rows(), 
-                    "Dimension for parameter matrix and input vector in forward propagation mismatched");
+            BOOST_ASSERT(layer->theta.transpose().cols() == layer->input_vector(input).rows()); 
 
             y = layer->theta.transpose() * layer->input_vector(input);
         } else {
-            BOOST_ASSERT_MSG(layer->theta.transpose().cols() == layer->input_vector().rows(), 
-                    "Dimension for parameter matrix and input vector in forward propagation mismatched");
+            BOOST_ASSERT(layer->theta.transpose().cols() == layer->input_vector().rows());
 
             y = layer->theta.transpose() * layer->input_vector();
         }
@@ -110,13 +107,11 @@ const Vector& NeuralNetwork::forward_propagation(const Vector& input)
 
 void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double alpha)
 {
-    BOOST_ASSERT_MSG(x.rows() == inputs && x.cols() == 1,
-            "Input vector dimension is wrong for this back propagation");
+    BOOST_ASSERT(x.rows() == inputs && x.cols() == 1);
 
     const Vector& value = forward_propagation(x);
 
-    BOOST_ASSERT_MSG(value.rows() == y.rows() && value.cols() == y.cols(),
-            "Dimension for forward propagations output vector and the given training simple mismatched");
+    BOOST_ASSERT(value.rows() == y.rows() && value.cols() == y.cols());
 
     NeuralNetwork::iterator it = breadth_first_reverse();
 
@@ -133,8 +128,7 @@ void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double al
             } else {
                 NeuralLayer* succ = layer->next.front();
 
-                BOOST_ASSERT_MSG(succ->theta.cols() == succ->error.rows(),
-                        "Dimension for parameter matrix and error vector in back propgation mismatched");
+                BOOST_ASSERT(succ->theta.cols() == succ->error.rows());
 
                 Vector p = (succ->theta * succ->error);
                 Vector reduce = succ->BIAS ? p.block(1, 0, p.rows() - 1, 1) : p;
@@ -153,8 +147,7 @@ void NeuralNetwork::back_propagation(const Vector& x, const Vector& y, double al
 
         Vector in = (layer == input_layer) ? layer->input_vector(x) : layer->input_vector();
 
-        BOOST_ASSERT_MSG(in.cols() == layer->error.cols(),
-                "Dimension mismatch in parameter update");
+        BOOST_ASSERT(in.cols() == layer->error.cols());
 
         layer->theta += alpha * in * -layer->error.transpose();
 
