@@ -16,7 +16,8 @@ set(HPP
 
 rock_library(machine_learning
     SOURCES ${CPP}
-    HEADERS ${HPP})
+    HEADERS ${HPP}
+    DEPS_PKGCONFIG base-types eigen3)
 
 rock_executable(machine_learning_bin Main.cpp
     DEPS machine_learning

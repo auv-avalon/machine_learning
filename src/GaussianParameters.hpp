@@ -6,43 +6,45 @@ fndef MACHINE_LEARNING__GUASSIAN_PARAMETERS_HPP
 
 namespace machine_learning {
 
+
+template <int DIM>
+inline double gaussian(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov, const VECTOR_XD(DIM)& x) {
+    return exp(-0.5 * (x - mean).transpose() * cov.inverse() * (x - mean));
+}
+
+
+template <int DIM>
+inline double gaussian_norm(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov, const VECTOR_XD(DIM)& x) {
+    return 1.0 / (pow(sqrt(2 * M_PI), mean.rows()) * sqrt(cov.determinat())) 
+        * gaussian(mean, cov, x);
+}
+
+
 template <int DIM> 
 struct GaussParam {
     VECTOR_XD(DIM) mean;
     MATRIX_XD(DIM) covariance;
+
+    template <int DIM>
+    inline double gaussian(const VECTOR_XD(DIM)& x) {
+        return gaussian(ean, covariance, x);
+    }
+
+    template <int DIM>
+    inline double gaussian_norm(const VECTOR_XD(DIM)& x) {
+       return gaussian_norm(mean, covariance, x);
+    }
 };
 
 
 
-template <int DIM>
-struct EigenValues {
-    VECTOR_XD(DIM) x;
-    double alpha;
-};
 
+tempate <int DIM>
+GaussParam<DIM> calculate_gaussian(const std::vector< VECTOR_XD(DIM) >& samples) {
+    GaussParam<DIM> params;
 
-
-template <int DIM>
-double gaussian(const GaussParam<DIM>& param, const VECTOR_XD(DIM)& x) {
-    double y = (x - param.mean);
-    return exp(-0.5 * y.transpose() * param.covariance.inverse() * y);
+    return params;
 }
-
-
-template <int DIM>
-inline double gaussian_norm(const GaussParam<DIM>& param, const VECTOR_XD(DIM)& x) {
-    return 1.0 / (pow(sqrt(2 * M_PI), param.mean.rows()) * sqrt(param.covariance.determinat())) 
-        * gaussian(param, x);
-}
-
-
-
-template<int DIM>
-std::vector<EigenValues<DIM> > computeEigen(const GaussParam<DIM>& param) {
-    std::vector<EigenValues<DIM> > values;
-
-    return values;
-};
 
 
 
