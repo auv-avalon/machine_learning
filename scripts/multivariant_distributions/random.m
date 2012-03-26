@@ -2,8 +2,8 @@
 
 NUMBERS = 1000
 
-MU = [1 1]
-SIGMA = [0 1; 1 0]
+MU = [0 0]
+SIGMA = [1 0.99; 0.99 1]
 
 [mu_n, mu_m] = size(MU)
 [S_n, S_m] = size(SIGMA)

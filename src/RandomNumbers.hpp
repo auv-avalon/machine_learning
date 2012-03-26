@@ -12,6 +12,7 @@
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/normal_distribution.hpp>
+#include <Eigen/Cholesky>
 #include "GaussianParameters.hpp"
 
 namespace machine_learning {
@@ -24,20 +25,25 @@ typedef boost::variate_generator<boost::minstd_rand&, boost::normal_distribution
 
 template <int DIM>
 class MultiNormalRandom {
+  public:
       MultiNormalRandom(boost::minstd_rand& seed, const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov)
-          : NormalRandom(seed, boost::normal_distribution<>(0.0, 1.0)), parameters(mean, cov)
+          : Normal(seed, boost::normal_distribution<>(0.0, 1.0)), parameters(mean, cov)
       {}
 
       VECTOR_XD(DIM) operator()() {
           VECTOR_XD(DIM) random_number;
 
-          if(!parameters.covariance.ldlt().isPositive())
-              throw new std::runtime_error("Covariance is not semi-positive definit");
+          // TODO: check semi-positive definite property for covariances
+
+          Eigen::LLT<MATRIX_XD(DIM)> llt(parameters.covariance);
+          MATRIX_XD(DIM) CH = llt.matrixL().transpose();
+
+          std::cerr << CH << std::endl;
 
           for(unsigned i = 0; i < DIM; i++)
               random_number(i) = Normal();
 
-          return random_number * parameters.covariance.ldlt().matrixLDLT() + parameters.mean;
+          return (random_number.transpose() * CH).transpose() + parameters.mean;
       }
 
   private:

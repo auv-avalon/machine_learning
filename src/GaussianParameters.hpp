@@ -4,8 +4,8 @@
 #include <vector>
 #include <Eigen/Core>
 
-#define VECTOR_XD(DIM) Eigen::Matrix<double, DIM, 1, Eigen::DontAlign>
-#define MATRIX_XD(DIM) Eigen::Matrix<double, DIM, DIM, Eigen::DontAlign>
+#define VECTOR_XD(DIM) Eigen::Matrix<double, DIM, 1>
+#define MATRIX_XD(DIM) Eigen::Matrix<double, DIM, DIM>
 
 namespace machine_learning {
 
