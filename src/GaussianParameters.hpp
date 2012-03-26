@@ -27,6 +27,10 @@ struct GaussParam {
     VECTOR_XD(DIM) mean;
     MATRIX_XD(DIM) covariance;
 
+    GaussParam(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov) 
+        : mean(mean), covariance(cov)
+    {}
+
     inline double gaussian(const VECTOR_XD(DIM)& x) {
         return gaussian(mean, covariance, x);
     }
@@ -40,8 +44,21 @@ struct GaussParam {
 
 
 template <int DIM>
-GaussParam<DIM> calculate_gaussian(const std::vector< VECTOR_XD(DIM) >& samples) {
-    GaussParam<DIM> params;
+GaussParam<DIM> calculate_parameters(const std::vector< VECTOR_XD(DIM) >& samples, int cov_scaling = 1) {
+    GaussParam<DIM> params(VECTOR_XD(DIM)::Zero(), MATRIX_XD(DIM)::Zero());
+
+    for(unsigned i = 0; i < samples.size(); i++) {
+        params.mean += samples[i];
+    }
+
+    params.mean /= samples.size();
+
+    for(unsigned i = 0; i < samples.size(); i++) {
+        VECTOR_XD(DIM) s = (samples[i] - params.mean);
+        params.covariance += s * s.transpose();
+    }
+
+    params.covariance /= (samples.size() + cov_scaling);
 
     return params;
 }
