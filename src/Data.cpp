@@ -71,5 +71,4 @@ std::vector<Data> Data::split(unsigned number) const
     return partitions;
 }
 
-
 }

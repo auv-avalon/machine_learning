@@ -1,5 +1,7 @@
-fndef MACHINE_LEARNING__GUASSIAN_PARAMETERS_HPP
+#ifndef MACHINE_LEARNING__GUASSIAN_PARAMETERS_HPP
 #define MACHINE_LEARNING__GUASSIAN_PARAMETERS_HPP
+
+#include <vector>
 
 #define VECTOR_XD(DIM) Eigen::Matrix<double, DIM, 1, Eigen::DontAlign>
 #define MATRIX_XD(DIM) Eigen::Matrix<double, DIM, DIM, Eigen::DontAlign>
@@ -25,12 +27,10 @@ struct GaussParam {
     VECTOR_XD(DIM) mean;
     MATRIX_XD(DIM) covariance;
 
-    template <int DIM>
     inline double gaussian(const VECTOR_XD(DIM)& x) {
-        return gaussian(ean, covariance, x);
+        return gaussian(mean, covariance, x);
     }
 
-    template <int DIM>
     inline double gaussian_norm(const VECTOR_XD(DIM)& x) {
        return gaussian_norm(mean, covariance, x);
     }
@@ -39,7 +39,7 @@ struct GaussParam {
 
 
 
-tempate <int DIM>
+template <int DIM>
 GaussParam<DIM> calculate_gaussian(const std::vector< VECTOR_XD(DIM) >& samples) {
     GaussParam<DIM> params;
 
