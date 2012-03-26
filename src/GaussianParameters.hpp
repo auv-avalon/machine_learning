@@ -2,6 +2,7 @@
 #define MACHINE_LEARNING__GUASSIAN_PARAMETERS_HPP
 
 #include <vector>
+#include <Eigen/Core>
 
 #define VECTOR_XD(DIM) Eigen::Matrix<double, DIM, 1, Eigen::DontAlign>
 #define MATRIX_XD(DIM) Eigen::Matrix<double, DIM, DIM, Eigen::DontAlign>

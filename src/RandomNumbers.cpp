@@ -10,6 +10,7 @@ boost::minstd_rand& Random::seed() {
     return instance;
 }
 
+
 UniformRandom Random::uniform(double min, double max) {    
     boost::uniform_real<> dist(min, max);
     return UniformRandom(seed(), dist);
@@ -20,5 +21,5 @@ NormalRandom Random::gaussian(double mean, double variance) {
     return NormalRandom(seed(), dist);
 }
 
-} // namespace eras
+} // namespace machine_learning
 
