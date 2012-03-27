@@ -29,6 +29,9 @@ class MultiNormalRandom {
       MultiNormalRandom(boost::minstd_rand& seed, const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov)
           : Normal(seed, boost::normal_distribution<>(0.0, 1.0)), parameters(mean, cov)
       {}
+      MultiNormalRandom(const MultiNormalRandom& copy) 
+          : Normal(copy.Normal), parameters(copy.parameters)
+      {}
 
       VECTOR_XD(DIM) operator()() {
           VECTOR_XD(DIM) random_number;
@@ -46,6 +49,10 @@ class MultiNormalRandom {
           return (random_number.transpose() * CH).transpose() + parameters.mean;
       }
 
+      MultiNormalRandom operator=(const MultiNormalRandom& mnr) {
+          return *this;
+      }
+
   private:
       NormalRandom Normal;
       GaussParam<DIM> parameters;
@@ -59,12 +66,12 @@ class Random {
       static NormalRandom gaussian(double mean = 0.0, double variance = 1.0);
 
       template <int DIM>
-      static MultiNormalRandom<DIM> multi_gaussian(const VECTOR_XD(DIM)& mean = VECTOR_XD(DIM)::Zero(), const MATRIX_XD(DIM)& cov = MATRIX_XD(DIM)::Ones().asDiagonal()) {
+      static MultiNormalRandom<DIM> multi_gaussian(const VECTOR_XD(DIM)& mean = VECTOR_XD(DIM)::Zero(), const MATRIX_XD(DIM)& cov = MATRIX_XD(DIM)::Identity()) {
           return MultiNormalRandom<DIM>(seed(), mean, cov);
       }
 
       template <int DIM>
-      static MultiNormalRandom<DIM> multi_gaussian(const GaussParam<DIM>& parameters = GaussParam<DIM>()) {
+      static MultiNormalRandom<DIM> multi_gaussian(const GaussParam<DIM>& parameters) {
           return MultiNormalRandom<DIM>(seed(), parameters.mean, parameters.covariance);
       }
 
