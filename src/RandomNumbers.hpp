@@ -54,17 +54,17 @@ class MultiNormalRandom {
 
 class Random {
   public:
-      static UniformRandom uniform(double min, double max);
+      static UniformRandom uniform(double min = 0.0, double max = 1.0);
 
-      static NormalRandom gaussian(double mean, double variance);
+      static NormalRandom gaussian(double mean = 0.0, double variance = 1.0);
 
       template <int DIM>
-      static MultiNormalRandom<DIM> multi_gaussian(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov) {
+      static MultiNormalRandom<DIM> multi_gaussian(const VECTOR_XD(DIM)& mean = VECTOR_XD(DIM)::Zero(), const MATRIX_XD(DIM)& cov = MATRIX_XD(DIM)::Ones().asDiagonal()) {
           return MultiNormalRandom<DIM>(seed(), mean, cov);
       }
 
       template <int DIM>
-      static MultiNormalRandom<DIM> multi_gaussian(const GaussParam<DIM>& parameters) {
+      static MultiNormalRandom<DIM> multi_gaussian(const GaussParam<DIM>& parameters = GaussParam<DIM>()) {
           return MultiNormalRandom<DIM>(seed(), parameters.mean, parameters.covariance);
       }
 

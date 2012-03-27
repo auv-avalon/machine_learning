@@ -28,7 +28,7 @@ struct GaussParam {
     VECTOR_XD(DIM) mean;
     MATRIX_XD(DIM) covariance;
 
-    GaussParam(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov) 
+    GaussParam(const VECTOR_XD(DIM)& mean = VECTOR_XD(DIM)::Zero(), const MATRIX_XD(DIM)& cov = MATRIX_XD(DIM)::Ones().asDiagional()) 
         : mean(mean), covariance(cov)
     {}
 
