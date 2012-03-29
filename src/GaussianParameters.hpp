@@ -9,15 +9,14 @@
 
 namespace machine_learning {
 
-
 template <int DIM>
-inline double gaussian(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov, const VECTOR_XD(DIM)& x) {
+inline double calc_gaussian(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov, const VECTOR_XD(DIM)& x) {
     return exp(-0.5 * (x - mean).transpose() * cov.inverse() * (x - mean));
 }
 
 
 template <int DIM>
-inline double gaussian_norm(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov, const VECTOR_XD(DIM)& x) {
+inline double calc_gaussian_norm(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov, const VECTOR_XD(DIM)& x) {
     return 1.0 / (pow(sqrt(2 * M_PI), mean.rows()) * sqrt(cov.determinat())) 
         * gaussian(mean, cov, x);
 }
@@ -28,16 +27,16 @@ struct GaussParam {
     VECTOR_XD(DIM) mean;
     MATRIX_XD(DIM) covariance;
 
-    GaussParam(const VECTOR_XD(DIM)& mean = VECTOR_XD(DIM)::Zero(), const MATRIX_XD(DIM)& cov = MATRIX_XD(DIM)::Ones().asDiagional()) 
+    GaussParam(const VECTOR_XD(DIM)& mean = VECTOR_XD(DIM)::Zero(), const MATRIX_XD(DIM)& cov = MATRIX_XD(DIM)::Identity()) 
         : mean(mean), covariance(cov)
     {}
 
     inline double gaussian(const VECTOR_XD(DIM)& x) {
-        return gaussian(mean, covariance, x);
+        return calc_gaussian<DIM>(mean, covariance, x);
     }
 
     inline double gaussian_norm(const VECTOR_XD(DIM)& x) {
-       return gaussian_norm(mean, covariance, x);
+       return calc_gaussian_norm<DIM>(mean, covariance, x);
     }
 };
 

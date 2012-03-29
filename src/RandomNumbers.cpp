@@ -11,10 +11,16 @@ boost::minstd_rand& Random::seed() {
 }
 
 
-UniformRandom Random::uniform(double min, double max) {    
+UniformRealRandom Random::uniform_real(double min, double max) {    
     boost::uniform_real<> dist(min, max);
-    return UniformRandom(seed(), dist);
+    return UniformRealRandom(seed(), dist);
 }
+
+UniformIntRandom Random::uniform_int(int min, int max) {    
+    boost::uniform_int<> dist(min, max);
+    return UniformIntRandom(seed(), dist);
+}
+
 
 NormalRandom Random::gaussian(double mean, double variance) {
     boost::normal_distribution<> dist(mean, variance);

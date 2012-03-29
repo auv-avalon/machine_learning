@@ -11,17 +11,19 @@
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/uniform_real.hpp>
+#include <boost/random/uniform_int.hpp>
 #include <boost/random/normal_distribution.hpp>
 #include <Eigen/Cholesky>
 #include "GaussianParameters.hpp"
 
 namespace machine_learning {
 
+typedef boost::variate_generator<boost::minstd_rand&, boost::uniform_int<> >
+    UniformIntRandom;
 typedef boost::variate_generator<boost::minstd_rand&, boost::uniform_real<> > 
-    UniformRandom;
+    UniformRealRandom;
 typedef boost::variate_generator<boost::minstd_rand&, boost::normal_distribution<> > 
     NormalRandom;
-
 
 template <int DIM>
 class MultiNormalRandom {
@@ -61,9 +63,11 @@ class MultiNormalRandom {
 
 class Random {
   public:
-      static UniformRandom uniform(double min = 0.0, double max = 1.0);
+      static UniformRealRandom uniform_real(double min = 0.0, double max = 1.0);
 
       static NormalRandom gaussian(double mean = 0.0, double variance = 1.0);
+
+      static UniformIntRandom uniform_int(int min = 0, int max = 1);
 
       template <int DIM>
       static MultiNormalRandom<DIM> multi_gaussian(const VECTOR_XD(DIM)& mean = VECTOR_XD(DIM)::Zero(), const MATRIX_XD(DIM)& cov = MATRIX_XD(DIM)::Identity()) {
