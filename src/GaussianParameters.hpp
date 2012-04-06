@@ -38,6 +38,14 @@ struct GaussParam {
     inline double gaussian_norm(const VECTOR_XD(DIM)& x) {
        return calc_gaussian_norm<DIM>(mean, covariance, x);
     }
+
+    inline double mahalanobis(const VECTOR_XD(DIM)& x) {
+       return sqrt((x - mean).transpose() * covariance.inverse() * (x - mean));
+    }
+
+    inline double euclidean(const VECTOR_XD(DIM)& x) {
+       return sqrt((x - mean).transpose() * MATRIX_XD(DIM)::Identity() * (x - mean));
+    }
 };
 
 

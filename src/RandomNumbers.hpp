@@ -43,8 +43,6 @@ class MultiNormalRandom {
           Eigen::LLT<MATRIX_XD(DIM)> llt(parameters.covariance);
           MATRIX_XD(DIM) CH = llt.matrixL().transpose();
 
-          std::cerr << CH << std::endl;
-
           for(unsigned i = 0; i < DIM; i++)
               random_number(i) = Normal();
 
