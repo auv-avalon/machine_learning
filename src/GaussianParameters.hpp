@@ -9,6 +9,10 @@
 
 namespace machine_learning {
 
+inline double gaussian1d(double mean, double variance, double x) {
+   return exp((-0.5 * (x - mean) * (x - mean)) / variance);
+}
+
 template <int DIM>
 inline double calc_gaussian(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov, const VECTOR_XD(DIM)& x) {
     return exp(-0.5 * (x - mean).transpose() * cov.inverse() * (x - mean));
@@ -18,7 +22,7 @@ inline double calc_gaussian(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& co
 template <int DIM>
 inline double calc_gaussian_norm(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov, const VECTOR_XD(DIM)& x) {
     return 1.0 / (pow(sqrt(2 * M_PI), mean.rows()) * sqrt(cov.determinat())) 
-        * gaussian(mean, cov, x);
+        * calc_gaussian(mean, cov, x);
 }
 
 
