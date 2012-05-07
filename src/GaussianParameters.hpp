@@ -15,7 +15,8 @@ inline double gaussian1d(double mean, double variance, double x) {
 
 template <int DIM>
 inline double calc_gaussian(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov, const VECTOR_XD(DIM)& x) {
-    return exp(-0.5 * (x - mean).transpose() * cov.inverse() * (x - mean));
+    double z = (x - mean).transpose() * cov.inverse() * (x - mean);
+    return exp(-0.5 * z);
 }
 
 
