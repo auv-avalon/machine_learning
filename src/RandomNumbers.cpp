@@ -11,8 +11,8 @@ boost::minstd_rand& Random::seed() {
 }
 
 
-UniformRealRandom Random::uniform_real(double mean, double var) {    
-    boost::uniform_real<> dist(mean - var * 0.5, mean + var * 0.5);
+UniformRealRandom Random::uniform_real(double min, double max) {    
+    boost::uniform_real<> dist(min, max);
     return UniformRealRandom(seed(), dist);
 }
 
