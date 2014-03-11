@@ -2,6 +2,8 @@
 #include <boost/cstdint.hpp>
 #include <time.h>
 
+using ::boost::uint32_t;
+
 namespace machine_learning {
 
 boost::minstd_rand& Random::seed() {
