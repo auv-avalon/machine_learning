@@ -32,7 +32,7 @@ int main(int argc, char** argv)
     srand(seed);
 
     std::list<base::Vector3d*>* pl = generateRandomPointCloud(50);
-    machine_learning::DBScan dbscan(pl, 3, 4.0); // ignoring depth! use_z = 0
+    machine_learning::DBScan<base::Vector3d> dbscan(pl, 3, 4.0); // ignoring depth! use_z = 0
 
     /*
     double dist = dbscan.euclidean_distance(p1, p2, false);
