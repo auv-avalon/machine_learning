@@ -42,7 +42,7 @@ namespace machine_learning
 		 * @param distance	Alternitive distance-function between two points
 		 * 			If 0, the euklidian-distance is used
 		 */
-		DBScan(std::list<T*>* featureList, unsigned int min_pts, double epsilon, bool use_dynamic_epsilon = false, double dynamic_epsilon_weight = 1.0, double (*distance)(T*,T*) = 0 );
+		DBScan(std::list<T*>* featureList, unsigned int min_pts, double epsilon, bool use_dynamic_epsilon = false, double dynamic_epsilon_weight = 1.0, double (*distance)(T*,T*) = 0, bool speedup = false );
 
 		/* Scans the pointcloud for clusters.
 		 */
@@ -69,6 +69,8 @@ namespace machine_learning
 
 		std::map<T*, int> clustering;
 		int number_of_points;
+		bool speedup;
+		typename std::list<T*>::iterator start_point;
 
 		void initialize();
 		void reset();
@@ -83,13 +85,14 @@ namespace machine_learning
     
   
     template < typename T>
-    DBScan<T>::DBScan(std::list<T*>* featureList, unsigned int min_pts, double epsilon, bool use_dynamic_epsilon, double dynamic_epsilon_weight, double (*distance)(T*,T*))
+    DBScan<T>::DBScan(std::list<T*>* featureList, unsigned int min_pts, double epsilon, bool use_dynamic_epsilon, double dynamic_epsilon_weight, double (*distance)(T*,T*), bool speedup)
     {
         this->featureList = featureList;
         this->min_pts = min_pts;
         this->epsilon = epsilon;
         this->use_dynamic_epsilon = use_dynamic_epsilon;
         this->dynamic_epsilon_weight = dynamic_epsilon_weight;
+	this->speedup = speedup;
 	
 	if(distance == 0){
 	  pDistance = euclidean_distance;
@@ -112,6 +115,7 @@ namespace machine_learning
         for(typename std::list<T*>::iterator it = featureList->begin(); it != featureList->end(); it++) {
             if (clustering[*it] == UNCLASSIFIED) {
                 // Try to classify point
+	      this->start_point = it;
                 if (expandCluster(*it, cluster_id)) {
                     // New cluster found.
                     cluster_id++;
@@ -170,7 +174,7 @@ namespace machine_learning
             T* seed = seeds[PICK_POS];
             typename std::vector<T*> currentSeeds = neighbors(seed);
 
-            if(currentSeeds.size() >= min_pts) {
+            if(currentSeeds.size() >= min_pts || speedup) {
                 // Current Point has enough neighbors in epsilon radius.
                 BOOST_FOREACH( T* currentSeed, currentSeeds ) {
                     if(clustering[currentSeed] == UNCLASSIFIED || clustering[currentSeed] == NOISE) {
@@ -206,7 +210,7 @@ namespace machine_learning
     std::vector<T*> DBScan<T>::neighbors(T *point) {
         typename std::list<T*>::iterator it;
         typename std::vector<T*> neighbors;
-        for(it = featureList->begin(); it != featureList->end(); it++) {
+        for(it = featureList->begin(); it != featureList->end();it++) {
             if(*it == point) {
                 // Do not count yourself!
                 continue;
@@ -223,7 +227,18 @@ namespace machine_learning
             // Check for neighbor
             if(pDistance(point, *it) <= adjusted_epsilon) {
                 neighbors.push_back(*it);
+		
+		if(speedup && it != this->start_point){
+		  it = featureList->erase(it);
+		  
+		  if(it != featureList->begin()){
+		    it--;
+		  }
+		  
+		}
+		
             }
+	      
         }
         return neighbors;
     }
