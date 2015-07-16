@@ -22,7 +22,7 @@ inline double calc_gaussian(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& co
 
 template <int DIM>
 inline double calc_gaussian_norm(const VECTOR_XD(DIM)& mean, const MATRIX_XD(DIM)& cov, const VECTOR_XD(DIM)& x) {
-    return 1.0 / (pow(sqrt(2 * M_PI), mean.rows()) * sqrt(cov.determinat())) 
+    return 1.0 / (pow(sqrt(2 * M_PI), mean.rows()) * sqrt(cov.determinant())) 
         * calc_gaussian(mean, cov, x);
 }
 
